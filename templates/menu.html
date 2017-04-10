@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu</title>
+    <!--We'll use Allerta Stencil webfont. But feel free to fontify as you wish. -->
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Allerta+Stencil" />
+    <style>
+    /*Fixed size web page with light green background */
+    body {
+        width: 1054px;
+        height: 1054px;
+        background-color: springgreen;
+    }
+    /*Modified fonts for h2 and h3*/
+    h2,h3 {
+        font-family: "Allerta Stencil";
+        font-size: 24px;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 500;
+        line-height: 15.4px;
+        text-align: center;
+    }
+    /*The big box is the dashed box in the center.*/
+    #bigbox{
+        display: block;
+        width: 1000px;
+        height: 800px;
+        border: 10px dashed greenyellow;
+        background-color: white;
+    }
+    /*Used this to position the text fields inside bigbox*/
+    .verticalstack{
+        display: block;
+        margin-left: 100px;
+        /*align-items: center;*/
+    }
+    /*The following modifies how the input is treated.*/
+    input[type="text"] {
+        /*display: block;*/
+        margin: 0;
+        width: 100%;
+        font-family: "Allerta Stencil";
+        font-size: 18px; /*text size*/
+        appearance: none;
+        box-shadow: none;
+        border-radius: none;
+    }
+    input[type="text"]:focus {
+        outline: none;
+    }
+    .borderstyle input[type="text"] {
+        padding: 10px; /*Padding is clockwise: top:rit:bot:lef */
+        border: solid 5px #c9c9c9;
+        transition: border 0.3s;
+    }
+    .borderstyle input[type="text"]:focus,
+    .borderstyle input[type="text"].focus {
+        border: solid 5px #0ff222;
+    }
+    /*Styles for the button. Lot of code but it makes sure
+    the button can be seen in most browsers.
+     */
+    .myButton {
+        font-family: "Allerta Stencil";
+        -moz-box-shadow:inset 0px 0px 0px 0px #3dc21b;
+        -webkit-box-shadow:inset 0px 0px 0px 0px #3dc21b;
+        box-shadow:inset 0px 0px 0px 0px #3dc21b;
+        background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #00ff80), color-stop(1, #5cbf2a));
+        background:-moz-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:-webkit-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:-o-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:-ms-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:linear-gradient(to bottom, #00ff80 5%, #5cbf2a 100%);
+        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#00ff80', endColorstr='#5cbf2a',GradientType=0);
+        background-color:#00ff80;
+        -moz-border-radius:18px;
+        -webkit-border-radius:18px;
+        border-radius:18px;
+        border:1px solid #18ab29;
+        display:inline-block;
+        cursor:pointer;
+        color:#ffffff;
+        font-family: "Allerta Stencil";
+        font-size:17px;
+        font-weight:bold;
+        padding:14px 29px;
+        text-decoration:none;
+        text-shadow:0px 1px 11px #2f6627;
+    }
+    .myButton:hover {
+        background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #5cbf2a), color-stop(1, #00ff80));
+        background:-moz-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:-webkit-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:-o-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:-ms-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:linear-gradient(to bottom, #5cbf2a 5%, #00ff80 100%);
+        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#5cbf2a', endColorstr='#00ff80',GradientType=0);
+        background-color:#5cbf2a;
+    }
+    .myButton:active {
+        position:relative;
+        top:1px;
+    }
+    /* above is copy paste from miguel*/
+    ul {
+    list-style-type: none;
+    margin: 0 auto;
+    padding: 0;
+    overflow: hidden;
+    text-align: center;
+    border-color: red;
+    }
+
+    li {
+        font-family: "Allerta Stencil";
+        display:inline-block;
+        border-color: black;
+        background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #00ff80), color-stop(1, #5cbf2a));
+        background:-moz-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:-webkit-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:-o-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:-ms-linear-gradient(top, #00ff80 5%, #5cbf2a 100%);
+        background:linear-gradient(to bottom, #00ff80 5%, #5cbf2a 100%);
+        border-radius: 180px;
+    }
+
+    li a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 16px;
+        text-decoration: none;
+        border-radius: 180px;
+    }
+
+    li a:hover {
+        background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #5cbf2a), color-stop(1, #00ff80));
+        background:-moz-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:-webkit-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:-o-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:-ms-linear-gradient(top, #5cbf2a 5%, #00ff80 100%);
+        background:linear-gradient(to bottom, #5cbf2a 5%, #00ff80 100%);
+        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#5cbf2a', endColorstr='#00ff80',GradientType=0);
+        background-color:#0ff222;
+    }
+    img {
+    display: block;
+    margin: 0 auto;
+    }
+    </style>
+</head>
+
+<body>
+<div id="bigbox">
+    <h2> Four Guys Express </h2>
+    <ul>
+  <li><a href="/">Home</a></li>
+  <li><a href="menu">Menu</a></li>
+  <li><a href="contact">Contact Us</a></li>
+  <li><a href="Signup">Sign up</a></li>
+  <li><a href="login">Log in</a></li>
+</ul>
+
+    </div>
+
+</body>
+</html>
