@@ -1,22 +1,41 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 {% block title %}
-Login
+menus
 {% endblock %}
 
-{% block styles %}
-{{super()}}
-<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
-{% endblock %}
-<body>
-    <h2> Four Guys Express </h2>
-    <ul>
+{% block content %}
+    <ul class="list-inline">
   <li><a href="/">Home</a></li>
   <li><a href="menu">Menu</a></li>
   <li><a href="contact">Contact Us</a></li>
   <li><a href="signup">Sign up</a></li>
   <li><a href="login">Log in</a></li>
-</ul>
 
-</body>
-</html>
+</ul>
+    <div class="container-fluid">
+    <div class="row">
+    {% for number,itemdes,price in iterr %}
+        <div class="col-md-4">
+            <p>{{ number }}</p>
+            <p>{{ itemdes }}</p>
+            <p>{{ price }}</p>
+        </div>
+    {% endfor %}
+    </div>
+    </div>
+    <br>
+    <br>
+    </ul>
+    <div class="container-fluid">
+    <div class="row">
+    {% for items in databaseitems%}
+        <div class="col-md-4">
+            <p>{{ items.itemname }}</p>
+            <p>{{ items.price }}</p>
+            <p>{{ items.itemdes }}</p>
+        </div>
+    {% endfor %}
+    </div>
+    </div>
+{% endblock %}

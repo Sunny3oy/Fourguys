@@ -23,6 +23,13 @@ class user(db.Model):
     password = db.Column(db.String(50))
     address = db.Column(db.String(50))
     card = db.Column(db.String(50))
+
+class items(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    itemname= db.Column(db.String(15), unique=True)
+    price = db.Column(db.Integer)
+    chef = db.Column(db.String(15))
+    itemdes = db.Column(db.String(50))
 #forms
 class signup(FlaskForm):
     firstname = StringField('First name', validators=[InputRequired()])
@@ -77,10 +84,13 @@ def menu():
         1.00,2.00, 100.00, 3.00, 500.00
     ]
     total = [0]
+
     if form.validate_on_submit():
 
         return render_template("checkout.html", total=total)
-    return render_template("menu.html",form=form,total=total,number=number, itemdes=itemdes, price=price, iterr=zip(number,itemdes,price))
+    return render_template("menu.html",form=form,
+                           total=total,number=number, itemdes=itemdes, price=price, iterr=zip(number,itemdes,price),
+                           databaseitems = items.query.all())
 
 @app.route('/checkout')
 def check():
