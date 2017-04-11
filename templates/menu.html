@@ -1,6 +1,14 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}
+Login
+{% endblock %}
 
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
+{% endblock %}
 <body>
-<div id="bigbox">
     <h2> Four Guys Express </h2>
     <ul>
   <li><a href="/">Home</a></li>
@@ -9,8 +17,6 @@
   <li><a href="signup">Sign up</a></li>
   <li><a href="login">Log in</a></li>
 </ul>
-
-    </div>
 
 </body>
 </html>
