@@ -6,10 +6,10 @@ Sign Up
 
 {% block styles %}
 {{super()}}
-<link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
 {% endblock %}
 
- {% block content %}
+{% block content %}
 <div class="container">
 
   <form class="form-signin" method="post" action="/signup">
