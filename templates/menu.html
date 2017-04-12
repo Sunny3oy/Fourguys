@@ -32,10 +32,15 @@ menus
     {% for items in databaseitems%}
         <div class="col-md-4">
             <p>{{ items.itemname }}</p>
-            <p>{{ items.price }}</p>
+            <p>Price:${{ items.price }}.00</p>
             <p>{{ items.itemdes }}</p>
+            {{ wtf.form_field(form.qty)}}
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Add to cart</button>
         </div>
     {% endfor %}
     </div>
     </div>
+    <br>
+    <h1> Shopping Cart</h1>
+
 {% endblock %}
