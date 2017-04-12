@@ -10,6 +10,13 @@ Sign Up
 {% endblock %}
 
 {% block content %}
+    {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 <div class="container">
 
   <form class="form-signin" method="post" action="/signup">
