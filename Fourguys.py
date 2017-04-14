@@ -6,13 +6,18 @@ from wtforms import StringField, PasswordField, BooleanField, IntegerField
 from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy import SQLAlchemy
 
+# For paths to files relative to this script.
+basedir = os.path.abspath( os.path.dirname(__file__) )
+
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['SECRET_KEY'] = 'key'
 Bootstrap(app)
-#your path to the database file must be correct
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/billy/PycharmProjects/Fourguys/database.db'
-#databases
+
+# os.path.join is used to say 'basedir/database.db' without worrying if
+# this will be run on a UNIX or Windows system.
+app.config['SQLALCHEMY_DATABASE_URI'] =\
+    'sqlite:///' + os.path.join(basedir, 'database.db')
 db = SQLAlchemy(app)
 
 class user(db.Model):
