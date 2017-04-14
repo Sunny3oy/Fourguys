@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, IntegerField
 from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager
 
 # For paths to files relative to this script.
 basedir = os.path.abspath( os.path.dirname(__file__) )
@@ -13,6 +14,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['SECRET_KEY'] = 'key'
 Bootstrap(app)
+manager = Manager(app)
 
 # os.path.join is used to say 'basedir/database.db' without worrying if
 # this will be run on a UNIX or Windows system.
@@ -119,5 +121,39 @@ def login():
 def contact():
     return render_template("contact.html")
 
+# - This function will create a database with all of the dummy data in
+#   it.
+# - The @manager.command decorator allows this function to be run from
+#   the command line by writing the name of the function So if you type
+#   in `python Fourguys.py rebuild_database` on the command line, this
+#   function will run.
+# - When new models are added, and there's dummy data to fill it, a new
+#   dictionary should be made in the dummy_files array that maps the
+#   model to the dummy data file.
+@manager.command
+def rebuild_database():
+    import csv
+    db.drop_all()
+    db.create_all()
+    dummy_files = [
+        {
+            'model': items, 
+            'file': os.path.join(basedir, 'dummy-data', 'menuitems.csv')
+        },
+        {
+            'model': user,
+            'file': os.path.join(basedir, 'dummy-data', 'users.csv')
+        },
+    ]
+    for thing in dummy_files:
+        with open(thing['file'], newline='') as csvfile:
+            reader = csv.DictReader(csvfile, skipinitialspace=True)
+            for row in reader:
+                new_item = thing['model'](**row)
+                db.session.add(new_item)
+                #print(new_item)
+    db.session.commit()
+
 if __name__ == '__main__':
-    app.run()
+    #app.run()
+    manager.run()
