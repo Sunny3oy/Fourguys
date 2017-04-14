@@ -135,18 +135,16 @@ def rebuild_database():
     import csv
     db.drop_all()
     db.create_all()
+    datadir = 'dummy-data'
+    # These files should be in the dummy-data directory (or whichever
+    # directory is currently the 'datadir'.
     dummy_files = [
-        {
-            'model': items, 
-            'file': os.path.join(basedir, 'dummy-data', 'menuitems.csv')
-        },
-        {
-            'model': user,
-            'file': os.path.join(basedir, 'dummy-data', 'users.csv')
-        },
+        { 'model': items, 'file': 'menuitems.csv' },
+        { 'model': user, 'file': 'users.csv' }
     ]
     for thing in dummy_files:
-        with open(thing['file'], newline='') as csvfile:
+        filename = os.path.join(basedir, datadir, thing['file'])
+        with open(filename, newline='') as csvfile:
             reader = csv.DictReader(csvfile, skipinitialspace=True)
             for row in reader:
                 new_item = thing['model'](**row)
