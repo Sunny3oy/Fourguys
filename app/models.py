@@ -37,7 +37,7 @@ class Customer(db.Model):
 
 class Menu(db.Model):
     __tablename__ = 'menus'
-    menuID = db.Column(db.Integer, primary_key=True)
+    menuID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     chefID = db.Column(db.Integer, db.ForeignKey('employees.emplID'))
     menuName = db.Column(db.String(50))
     menuDesc = db.Column(db.Text)
