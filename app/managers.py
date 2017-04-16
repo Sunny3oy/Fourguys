@@ -21,8 +21,9 @@ def rebuild_database():
     # These files should be in the dummy-data directory (or whichever
     # directory is currently the 'datadir'.
     dummy_files = [
-        { 'model': items, 'file': 'menuitems.csv' },
-        { 'model': user, 'file': 'users.csv' }
+        { 'model': Menu, 'file': 'menuitems.csv' },
+        { 'model': Customer, 'file': 'users.csv' },
+        { 'model': EmployeeType, 'file': 'emplTypes.csv' },
     ]
     for thing in dummy_files:
         filename = path.join(basedir, datadir, thing['file'])
@@ -31,5 +32,4 @@ def rebuild_database():
             for row in reader:
                 new_item = thing['model'](**row)
                 db.session.add(new_item)
-                #print(new_item)
     db.session.commit()
