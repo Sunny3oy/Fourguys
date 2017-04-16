@@ -9,12 +9,13 @@ def signup1():
         if form.password.data != form.conpassword.data:
             flash('Password mush match!')
         else:
-            new_user = user(firstname=form.firstname.data,
-                            lastname=form.lastname.data,
-                            email=form.email.data,
-                            password=form.password.data,
-                            address = form.address.data,
-                            card=form.card.data)
+            new_user = Customer(username=form.username.data,
+                                firstName=form.firstname.data,
+                                lastName=form.lastname.data,
+                                email=form.email.data,
+                                password=form.password.data,
+                                address=form.address.data,
+                                cardNumber=form.card.data)
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('login'))
@@ -44,7 +45,7 @@ def menu():
         return render_template("checkout.html", total=total)
     return render_template("menu.html", form=form,
                            total=total, number=number, itemdes=itemdes, price=price, iterr=zip(number,itemdes,price),
-                           databaseitems = items.query.all())
+                           databaseitems = Menu.query.all())
 
 @app.route('/checkout')
 def check():
@@ -56,9 +57,9 @@ def login():
     form = login1()
     if form.validate_on_submit():
 
-        User = user.query.filter_by(email = form.email.data).first()
-        if User:
-            if User.password == form.password.data:
+        customer = Customer.query.filter_by(username=form.username.data).first()
+        if customer:
+            if customer.password == form.password.data:
                 return redirect(url_for('contact'))
             else:
                 flash('Incorrect password or email')
