@@ -36,7 +36,7 @@ class Menu(db.Model):
     menuDesc = db.Column(db.Text)
     menuPrice = db.Column(db.REAL)
     menuRating = db.Column(db.Integer)
-    menuPict = db.Column(db.BLOB)
+    menuPict = db.Column(db.String(50))
 
     __table_args__ = (db.CheckConstraint(sqltext='menuRating BETWEEN 1 AND 5',
                                          name='valid_rating'),)

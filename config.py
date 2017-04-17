@@ -9,4 +9,4 @@ SECRET_KEY = 'ThisIsTheMostAwesomeSafeKey123!'
 # this will be run on a UNIX or Windows system.
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + path.join(basedir, 'database.db')
 
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+SQLALCHEMY_TRACK_MODIFICATIONS = True
