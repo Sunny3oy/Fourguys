@@ -15,6 +15,33 @@ menus
   <li><a href="signup">Sign up</a></li>
   <li><a href="login">Log in</a></li>
     </ul>
+     <h1> Shopping Cart</h1>
+    {% if doge == 0 or sumitem == 0%}
+        <h1> Cart is empty </h1>
+    {% else %}
+        <div class="container-fluid">
+        <form method="post" action="/menu">
+        <div class="row">
+        <div class="col-md-4">
+    {% for items in databaseitems%}
+        {{ form.hidden_tag() }}
+        <p>{{ items.menuName }}</p>
+    {% endfor %}
+    </div>
+    <div class="col-md-4">
+        {{ form.hidden_tag() }}
+        {% for items in total %}
+            <p>Total Price for this item:{{ items }}</p>
+        {% endfor %}
+    </div>
+    </div>
+    <h1> Total Price</h1>
+    <h2>${{ sumitem }}0</h2>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Checkout</button>
+    </form>
+    </div>
+    {% endif %}
+<br>
     <h1> Menu</h1>
     <div class="container-fluid">
     <form method="post" action="/menu">
@@ -45,31 +72,5 @@ menus
     </div>
 
     <br>
-    <h1> Shopping Cart</h1>
-    {% if doge == 0 or sumitem == 0%}
-        <h1> Cart is empty </h1>
-    {% else %}
-        <div class="container-fluid">
-        <form method="post" action="/menu">
-        <div class="row">
-        <div class="col-md-4">
-    {% for items in databaseitems%}
-        {{ form.hidden_tag() }}
-        <p>{{ items.menuName }}</p>
-    {% endfor %}
-    </div>
-    <div class="col-md-4">
-        {{ form.hidden_tag() }}
-        {% for items in total %}
-            <p>Total Price for this item:{{ items }}</p>
-        {% endfor %}
-    </div>
-    </div>
-    <h1> Total Price</h1>
-    <h2>${{ sumitem }}0</h2>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Checkout</button>
-    </form>
-    </div>
-    {% endif %}
 
 {% endblock %}
