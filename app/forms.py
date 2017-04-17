@@ -10,7 +10,6 @@ class signup(FlaskForm):
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
     conpassword = PasswordField('Confirm Password', validators=[InputRequired(), Length(min=8, max=80), ])
     address = StringField('Address', validators=[InputRequired()])
-    card = PasswordField('Card Number', validators=[InputRequired()])
 
 class login1(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(max=50)])
