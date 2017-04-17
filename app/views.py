@@ -14,8 +14,7 @@ def signup1():
                                 lastName=form.lastname.data,
                                 email=form.email.data,
                                 password=form.password.data,
-                                address=form.address.data,
-                                cardNumber=form.card.data)
+                                address=form.address.data)
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('login'))
