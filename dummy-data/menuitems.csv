@@ -1,4 +1,4 @@
-menuName, menuPrice, menuDesc
-Cheeseburger, 2, cheapass burger
-Doge, 255, Limited time offer
-water or oil?, 1, Might be water or oil
+itemID, itemName, itemPrice, itemDesc
+1, Cheeseburger, 2, cheapass burger
+2, Doge, 255, Limited time offer
+3, water or oil?, 1, Might be water or oil
