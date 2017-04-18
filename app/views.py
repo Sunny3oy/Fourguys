@@ -1,6 +1,11 @@
 from .forms import *
 from .models import *
 from flask import render_template, flash, url_for, redirect
+from flask_login import *
+
+@app.login_manager.user_loader
+def load_user(user_id):
+    return Customer.query.get(int(user_id))
 
 @app.route('/signup',methods=['GET', 'POST'])
 def signup1():
@@ -59,10 +64,24 @@ def login():
         customer = Customer.query.filter_by(username=form.username.data).first()
         if customer:
             if customer.password == form.password.data:
+                login_user(customer)
                 return redirect(url_for('contact'))
             else:
                 flash('Incorrect password or email')
     return render_template("login.html", form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+@app.route('/checkUser')
+def checkUser():
+    if current_user.is_authenticated:
+        return '<h1> You are logged in, %s %s </h1>' % (current_user.firstName, current_user.lastName)
+    else:
+        return '<h1> You are logged out </h1>'
 
 @app.route('/contact')
 def contact():
