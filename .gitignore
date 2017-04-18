@@ -1,5 +1,12 @@
+# The following directories and files are ignored during push
+# request. This does not mean, however, that they will
+# disappear from your working directory in your local computer.
+
 venv/
 .idea/
 __pycache__/
+
+*.pyc
+*.exe
+
 database.db
-sqlite3.exe

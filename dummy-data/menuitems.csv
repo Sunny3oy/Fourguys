@@ -1,4 +1,4 @@
-menuID,chefID,menuName, menuPrice, menuDesc, menuRating, menuPict
-1,1,Cheeseburger, 2, cheapass burger,5,cheeseburger.png
-2,1,Doge, 255, Limited time offer,5,doge.jpg
-3,1,water or oil?, 1, Might be water or oil,3,wateroil.jpeg
+itemID, itemName, itemPrice, itemDesc, itemPict
+1, Cheeseburger, 2, cheapass burger, cheeseburger.png
+2, Doge, 255, Limited time offer!, doge.jpg
+3, water or oil?, 1, Might be water or oil, wateroil.jpeg

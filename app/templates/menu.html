@@ -49,10 +49,10 @@ menus
     <div class="col-md-4">
     {% for items in databaseitems%}
         {{ form.hidden_tag() }}
-        <p>{{ items.menuName }}</p>
-        <p>Price:${{ items.menuPrice }}0</p>
-        <img src="static/{{ items.menuPict }}" alt="FBI">
-        <p>{{ items.menuDesc }}</p>
+        <p>{{ items.itemName }}</p>
+        <p>Price:${{ items.itemPrice }}0</p>
+        <img src="static/{{ items.itemPict }}" alt="FBI">
+        <p>{{ items.itemDesc }}</p>
             {{ form.hidden_tag() }}
         {% if loop.index == 1 %}
             {{ form.hidden_tag() }}
