@@ -21,9 +21,10 @@ def rebuild_database():
     # These files should be in the dummy-data directory (or whichever
     # directory is currently the 'datadir'.
     dummy_files = [
-        { 'model': Menu, 'file': 'menuitems.csv' },
+        { 'model': FoodItem, 'file': 'menuitems.csv' },
         { 'model': Customer, 'file': 'users.csv' },
         { 'model': EmployeeType, 'file': 'emplTypes.csv' },
+        { 'model': Employee, 'file': 'employees.csv' },
     ]
     for thing in dummy_files:
         filename = path.join(basedir, datadir, thing['file'])

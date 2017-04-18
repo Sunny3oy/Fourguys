@@ -1,10 +1,12 @@
 from app import app
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 db = SQLAlchemy(app)
 
-class Customer(db.Model):
+class Customer(UserMixin, db.Model):
     __tablename__ = 'customers'
-    username = db.Column(db.String(15), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(15), unique=True)
     lastName = db.Column(db.String(30))
     firstName = db.Column(db.String(30))
     address = db.Column(db.String(50))
@@ -31,29 +33,45 @@ class PaymentInfo(db.Model):
 class Menu(db.Model):
     __tablename__ = 'menus'
     menuID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    chefID = db.Column(db.Integer, db.ForeignKey('employees.emplID'))
+    chefID = db.Column(db.Integer, db.ForeignKey('employees.id'))
     menuName = db.Column(db.String(50))
     menuDesc = db.Column(db.Text)
-    menuPrice = db.Column(db.REAL)
-    menuRating = db.Column(db.Integer)
-    menuPict = db.Column(db.BLOB)
 
-    __table_args__ = (db.CheckConstraint(sqltext='menuRating BETWEEN 1 AND 5',
-                                         name='valid_rating'),)
 
     emplRel = db.relationship('Employee', backref='menuRel')
+
+class MenuItem(db.Model):
+    __tablename__ = 'menu_items'
+    menuItemID = db.Column(db.Integer, primary_key=True)
+    menuID = db.Column(db.Integer, db.ForeignKey('menus.menuID'))
+    itemID = db.Column(db.Integer, db.ForeignKey('food_items.itemID'))
+    menuItemRating = db.Column(db.Integer)
+
+    __table_args__ = (db.CheckConstraint(sqltext='menuItemRating BETWEEN 1 AND 5',
+                                         name='valid_rating'),)
+
+    menuRel = db.relationship('Menu', backref='menuItemRel')
+    foodItemRel = db.relationship('FoodItem', backref='menuItemRel')
+
+class FoodItem(db.Model):
+    __tablename__ = 'food_items'
+    itemID = db.Column(db.Integer, primary_key=True)
+    itemName = db.Column(db.String(50))
+    itemDesc = db.Column(db.Text)
+    itemPrice = db.Column(db.REAL)
+    itemPict = db.Column(db.String(50))
 
 class Order(db.Model):
     __tablename__ = 'orders'
     orderID = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), db.ForeignKey('customers.username'))
-    delivererID = db.Column(db.Integer, db.ForeignKey('employees.emplID'))
+    delivererID = db.Column(db.Integer, db.ForeignKey('employees.id'))
     totalPrice = db.Column(db.REAL)
 
     custRel = db.relationship('Customer', backref='orderRel')
     dboyRel = db.relationship('Employee', backref='orderRel')
 
-class OrderDetails(db.Model):
+class OrderDetail(db.Model):
     __tablename__ = 'order_details'
     orderDetailID = db.Column(db.Integer, primary_key=True)
     orderID = db.Column(db.Integer, db.ForeignKey('orders.orderID'))
@@ -68,9 +86,11 @@ class OrderDetails(db.Model):
     ordRel = db.relationship('Order', backref='ordDetailRel')
     menuRel = db.relationship('Menu', backref='ordDetailRel')
 
-class Employee(db.Model):
+class Employee(UserMixin, db.Model):
     __tablename__ = 'employees'
-    emplID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    lastName = db.Column(db.String(30))
+    firstName = db.Column(db.String(30))
     emplType = db.Column(db.Integer, db.ForeignKey('employee_types.typeID'))
     numComplaint = db.Column(db.Integer)
     payGrade = db.Column(db.REAL)
