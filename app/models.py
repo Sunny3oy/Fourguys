@@ -37,7 +37,6 @@ class Menu(db.Model):
     menuName = db.Column(db.String(50))
     menuDesc = db.Column(db.Text)
 
-
     emplRel = db.relationship('Employee', backref='menuRel')
 
 class MenuItem(db.Model):

@@ -3,7 +3,10 @@
 {% block title %}
 menus
 {% endblock %}
-
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
+{% endblock %}
 {% block content %}
     <ul class="list-inline">
   <li><a href="/">Home</a></li>
@@ -11,36 +14,63 @@ menus
   <li><a href="contact">Contact Us</a></li>
   <li><a href="signup">Sign up</a></li>
   <li><a href="login">Log in</a></li>
-
-</ul>
-    <div class="container-fluid">
-    <div class="row">
-    {% for number,itemdes,price in iterr %}
-        <div class="col-md-4">
-            <p>{{ number }}</p>
-            <p>{{ itemdes }}</p>
-            <p>{{ price }}</p>
-        </div>
-    {% endfor %}
-    </div>
-    </div>
-    <br>
-    <br>
     </ul>
-    <div class="container-fluid">
-    <div class="row">
-    {% for items in databaseitems%}
+     <h1> Shopping Cart</h1>
+    {% if doge == 0 or sumitem == 0%}
+        <h1> Cart is empty </h1>
+    {% else %}
+        <div class="container-fluid">
+        <form method="post" action="/menu">
+        <div class="row">
         <div class="col-md-4">
-            <p>{{ items.itemname }}</p>
-            <p>Price:${{ items.price }}.00</p>
-            <p>{{ items.itemdes }}</p>
-            {{ wtf.form_field(form.qty)}}
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Add to cart</button>
-        </div>
+    {% for items in databaseitems%}
+        {{ form.hidden_tag() }}
+        <p>{{ items.menuName }}</p>
     {% endfor %}
     </div>
+    <div class="col-md-4">
+        {{ form.hidden_tag() }}
+        {% for items in total %}
+            <p>Total Price for this item:{{ items }}</p>
+        {% endfor %}
     </div>
+    </div>
+    <h1> Total Price</h1>
+    <h2>${{ sumitem }}0</h2>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Checkout</button>
+    </form>
+    </div>
+    {% endif %}
+<br>
+    <h1> Menu</h1>
+    <div class="container-fluid">
+    <form method="post" action="/menu">
+    <div class="row">
+    <div class="col-md-4">
+    {% for items in databaseitems%}
+        {{ form.hidden_tag() }}
+        <p>{{ items.menuName }}</p>
+        <p>Price:${{ items.menuPrice }}0</p>
+        <img src="static/{{ items.menuPict }}" alt="FBI">
+        <p>{{ items.menuDesc }}</p>
+            {{ form.hidden_tag() }}
+        {% if loop.index == 1 %}
+            {{ form.hidden_tag() }}
+            {{ wtf.form_field(form.qty0)}}
+        {% elif loop.index == 2 %}
+            {{ form.hidden_tag() }}
+            {{ wtf.form_field(form.qty1)}}
+        {% else %}
+            {{ form.hidden_tag() }}
+            {{ wtf.form_field(form.qty2)}}
+        {% endif %}
+    {% endfor %}
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Add to Cart</button>
+    </div>
+    </form>
+    </div>
+
     <br>
-    <h1> Shopping Cart</h1>
 
 {% endblock %}

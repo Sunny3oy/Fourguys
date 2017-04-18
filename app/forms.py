@@ -17,4 +17,6 @@ class login1(FlaskForm):
     remember = BooleanField('Remember me')
 
 class menu1(FlaskForm):
-    qty = IntegerField('qty', validators=[InputRequired()], default=0)
+    qty0 = IntegerField('qty', validators=[InputRequired()], default=0)
+    qty1 = IntegerField('qty', validators=[InputRequired()], default=0)
+    qty2 = IntegerField('qty', validators=[InputRequired()], default=0)
