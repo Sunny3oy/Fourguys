@@ -157,7 +157,10 @@
   <li><a href="contact">Contact Us</a></li>
   <li><a href="signup">Sign up</a></li>
   <li><a href="login">Log in</a></li>
-        <h1>Hello {{ user }}!</h1>
+        {% if check %}
+            <li><a href="profile">profile</a></li>
+        {% endif %}
+        <h1>Hello {{ user }}!  </h1>
 </ul>
 <img src="static/homepage.jpg" alt="FBI was here">
     </div>
