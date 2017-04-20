@@ -13,7 +13,7 @@ class Customer(UserMixin, db.Model):
     city = db.Column(db.String(30))
     state = db.Column(db.String(2))
     zipcode = db.Column(db.Integer)
-    email = db.Column(db.String(30))
+    email = db.Column(db.String(30), unique=True)
     contactNum = db.Column(db.Integer)
     acctBal = db.Column(db.REAL)
     numWarning = db.Column(db.Integer)
@@ -88,11 +88,13 @@ class OrderDetail(db.Model):
 class Employee(UserMixin, db.Model):
     __tablename__ = 'employees'
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(15), unique=True)
     lastName = db.Column(db.String(30))
     firstName = db.Column(db.String(30))
     emplType = db.Column(db.Integer, db.ForeignKey('employee_types.typeID'))
     numComplaint = db.Column(db.Integer)
     payGrade = db.Column(db.REAL)
+    password = db.Column(db.Text)
 
     __table_args__ = (db.CheckConstraint(sqltext='numComplaint BETWEEN 0 and 3',
                                          name='complaint_range'),)
