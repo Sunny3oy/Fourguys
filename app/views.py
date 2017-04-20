@@ -25,9 +25,12 @@ def signup1():
             return redirect(url_for('login'))
     return render_template("Signup.html", form=form)
 
-@app.route('/')
+@app.route('/',methods=['GET', 'POST'])
 def home():
-    return render_template("home.html")
+    if current_user.is_authenticated:
+        return render_template("home.html",user = current_user.firstName)
+    else:
+        return render_template("home.html", user = "Guest")
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
@@ -62,7 +65,7 @@ def login():
         if customer:
             if customer.password == form.password.data:
                 login_user(customer)
-                return redirect(url_for('contact'))
+                return redirect(url_for('home'))
             else:
                 flash('Incorrect password or email')
     return render_template("login.html", form=form)

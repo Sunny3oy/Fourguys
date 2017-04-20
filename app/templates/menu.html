@@ -21,11 +21,12 @@ menus
     {% else %}
         <div class="container-fluid">
         <form method="post" action="/menu">
+
         <div class="row">
         <div class="col-md-4">
     {% for items in databaseitems%}
         {{ form.hidden_tag() }}
-        <p>{{ items.menuName }}</p>
+        <p>{{ items.itemName }}</p>
     {% endfor %}
     </div>
     <div class="col-md-4">
