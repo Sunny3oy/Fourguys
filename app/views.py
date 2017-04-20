@@ -32,6 +32,7 @@ def home():
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
     form = menu1()
+    # button = buttonform()
     doge = 0
     sumitem = 0
     if form.validate_on_submit():
@@ -45,13 +46,33 @@ def menu():
         total[2] = databaseprice3.itemPrice * form.qty2.data
         sumitem = sum(total)
         print (total[0],total[1],total[2])
-        return render_template("menu.html", form=form, databaseitems=FoodItem.query.all(), doge=doge,total = total,sumitem = sumitem)
+        #return render_template("menu.html", form=form, databaseitems=FoodItem.query.all(), doge=doge,total = total,sumitem = sumitem)
+        return check(sumitem)
+    # elif button.validate_one_submit():
+    #     return check(sumitem)
     return render_template("menu.html", form=form,databaseitems = FoodItem.query.all(), doge=doge,sumitem = sumitem)
 
 @app.route('/checkout')
-def check():
+def check(total):
+    message = ''
+    diffmessg = ''
+    difference = total - current_user.acctBal
 
-    return render_template("checkout.html")
+    # print(current_user.acctBal)
+    #
+    # print(current_user.acctBal)
+    # current_user.acctBal = 0
+    # print(current_user.acctBal)
+    if total > current_user.acctBal:
+        message = 'Seems like you need a new job.'
+
+    else:
+        message = 'Good to go!'
+        diffmessg = "Difference " + str(current_user.acctBal) + " - " +  str(total) + " = " + str(difference)
+        current_user.acctBal = current_user.acctBal - total
+        db.session.add(current_user)
+        db.session.commit()
+    return render_template("checkout.html", total = total, newbalance = current_user.acctBal, message=message, diffmessg=diffmessg)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
