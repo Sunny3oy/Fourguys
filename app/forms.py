@@ -11,6 +11,9 @@ class signup(FlaskForm):
     conpassword = PasswordField('Confirm Password', validators=[InputRequired(), Length(min=8, max=80), ])
     address = StringField('Address', validators=[InputRequired()])
 
+class accountsetting(FlaskForm):
+    addmoney = IntegerField('Add balence')
+
 class login1(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(max=50)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
