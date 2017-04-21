@@ -1,0 +1,24 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}
+menus
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Allerta+Stencil" />
+<link rel="stylesheet" href="{{url_for('.static', filename='menu.css')}}">
+{% endblock %}
+
+{# <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Allerta+Stencil" />#}
+    <!--<link rel="preconnect" type="text/css" href="//fonts.googleapis.com/css?family=Allerta+Stencil" /> -->
+{#    <style>#}
+{##}
+{#    </style>#}
+{% block content %}
+
+    <img src="static/DogDeliver.jpg">
+    <h2>Your total is: {{ total }} and your new balance is: {{ newbalance }}.
+    {{ message }} {{ diffmessg }}</h2>
+
+{% endblock %}

@@ -1,6 +1,6 @@
 from .forms import *
 from .models import *
-from flask import render_template, flash, url_for, redirect
+from flask import render_template, flash, url_for, redirect, session
 from flask_login import *
 
 @app.login_manager.user_loader
@@ -36,6 +36,7 @@ def home():
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
     form = menu1()
+    # button = buttonform()
     doge = 0
     sumitem = 0
     if form.validate_on_submit():
@@ -49,19 +50,53 @@ def menu():
         total[2] = databaseprice3.itemPrice * form.qty2.data
         sumitem = sum(total)
         print (total[0],total[1],total[2])
-        return render_template("menu.html", form=form, databaseitems=FoodItem.query.all(), doge=doge,total = total,sumitem = sumitem)
+        #return render_template("menu.html", form=form, databaseitems=FoodItem.query.all(), doge=doge,total = total,sumitem = sumitem)
+
+        # Create a key-value pair in the session dictionary to store the total
+        session['ProductTotal'] = sum(total)
+        # This key-value pair ensures that when the checkout page is refreshed,
+        # the customer is not charged more than once
+        session['orderMade'] = False
+        if current_user.is_authenticated:
+            return redirect(url_for('checkout'))
+        else:
+            return '<p> Hold on!!! You need to login first</p>'
+    # elif button.validate_one_submit():
+    #     return check(sumitem)
     return render_template("menu.html", form=form,databaseitems = FoodItem.query.all(), doge=doge,sumitem = sumitem)
 
 @app.route('/checkout')
-def check():
+@login_required
+def checkout():
+    # Get the value stored in the session['ProductTotal'] and store it in cartTotal
+    # If there is no item on the cart, return a message for them to return to menu
+    # Otherwise, process the order.
 
-    return render_template("checkout.html")
+    # If the checkout menu is refreshed, the user will be redirected to menu page
+    cartTotal = session.get('ProductTotal')
+
+    if cartTotal == 0:
+        return '<p>You have not selected anything, go back to <a href="menu">menu</a>!!!<p>'
+    else:
+        difference = cartTotal - current_user.acctBal
+        if session.get('orderMade'):
+            return redirect(url_for('menu'))
+        else:
+            if cartTotal > current_user.acctBal:
+                message = 'Seems like you need a new job.'
+            else:
+                message = 'Good to go!'
+                diffmessg = "Difference " + str(current_user.acctBal) + " - " + str(cartTotal) + " = " + str(difference)
+                current_user.acctBal = current_user.acctBal - cartTotal
+                db.session.add(current_user)
+                db.session.commit()
+                session['orderMade'] = True
+    return render_template("checkout.html", total=cartTotal, newbalance=current_user.acctBal, message=message, diffmessg=diffmessg)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = login1()
     if form.validate_on_submit():
-
         customer = Customer.query.filter_by(username=form.username.data).first()
         if customer:
             if customer.password == form.password.data:
