@@ -1,0 +1,25 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}
+Profile
+{% endblock %}
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
+{% endblock %}
+{% block content %}
+    <ul class="list-inline">
+  <li><a href="/">Home</a></li>
+  <li><a href="menu">Menu</a></li>
+  <li><a href="contact">Contact Us</a></li>
+  <li><a href="signup">Sign up</a></li>
+  <li><a href="login">Log in</a></li>
+    </ul>
+
+<h1> Profile </h1>
+  <ul>
+
+      <li><a href="addmoney">Add Money</a></li>
+
+    </ul>
+{% endblock %}

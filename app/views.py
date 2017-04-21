@@ -25,9 +25,13 @@ def signup1():
             return redirect(url_for('login'))
     return render_template("Signup.html", form=form)
 
-@app.route('/')
+@app.route('/',methods=['GET', 'POST'])
 def home():
-    return render_template("home.html")
+    check = current_user.is_authenticated
+    if current_user.is_authenticated:
+        return render_template("home.html",user = current_user.firstName,check = check)
+    else:
+        return render_template("home.html", user = "Guest", check = check)
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
@@ -97,7 +101,7 @@ def login():
         if customer:
             if customer.password == form.password.data:
                 login_user(customer)
-                return redirect(url_for('contact'))
+                return redirect(url_for('home'))
             else:
                 flash('Incorrect password or email')
     return render_template("login.html", form=form)
@@ -118,3 +122,18 @@ def checkUser():
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
+
+@app.route('/profile')
+@login_required
+def user_profile():
+    return render_template("profile.html", user = current_user)
+
+@app.route('/addmoney', methods=['GET', 'POST'])
+@login_required
+def addmoney():
+    form = accountsetting()
+    if form.validate_on_submit():
+        current_user.acctBal = form.addmoney.data + current_user.acctBal
+        db.session.commit()
+        return render_template("addmoney.html",form = form, user = current_user)
+    return render_template("addmoney.html",form = form, user = current_user)
