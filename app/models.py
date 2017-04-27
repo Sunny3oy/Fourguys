@@ -42,8 +42,8 @@ class Menu(db.Model):
 class MenuItem(db.Model):
     __tablename__ = 'menu_items'
     menuItemID = db.Column(db.Integer, primary_key=True)
-    menuID = db.Column(db.Integer, db.ForeignKey('menus.menuID'))
-    itemID = db.Column(db.Integer, db.ForeignKey('food_items.itemID'))
+    menuID = db.Column(db.Integer, db.ForeignKey('menus.menuID'), primary_key=True)
+    itemID = db.Column(db.Integer, db.ForeignKey('food_items.itemID'), primary_key=True)
     menuItemRating = db.Column(db.Integer)
 
     __table_args__ = (db.CheckConstraint(sqltext='menuItemRating BETWEEN 1 AND 5',
@@ -75,6 +75,7 @@ class OrderDetail(db.Model):
     orderDetailID = db.Column(db.Integer, primary_key=True)
     orderID = db.Column(db.Integer, db.ForeignKey('orders.orderID'))
     menuID = db.Column(db.Integer, db.ForeignKey('menus.menuID'))
+    itemID = db.Column(db.Integer, db.ForeignKey('food_items.itemID'))
     menuQty = db.Column(db.Integer)
     menuRating = db.Column(db.Integer)
     menuComments = db.Column(db.Text)
@@ -84,6 +85,7 @@ class OrderDetail(db.Model):
 
     ordRel = db.relationship('Order', backref='ordDetailRel')
     menuRel = db.relationship('Menu', backref='ordDetailRel')
+    itemRel = db.relationship('FoodItem', backref='ordDetailRel')
 
 class Employee(UserMixin, db.Model):
     __tablename__ = 'employees'
