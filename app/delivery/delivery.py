@@ -6,6 +6,13 @@ import secrets
 # TODO:
 # - Create package for delivery.
 #   - Figure out interface to all of the things in here.
+# - Do some more validation. Don't allow vertices that aren't
+#   technically in the graph, like vertices with a y larger than the
+#   height or an x wider than the width.
+# - Maybe make some sort of dispatcher that makes sure that functions
+#   get data in the form that they expect it without the user having to
+#   concern themselves with that.
+# - Make the shortest path algorithm faster.
 
 # Address to Vertex Conversion:
 # - We can use the validator to check if an address is a valid sky
@@ -20,10 +27,6 @@ import secrets
 #     columns.
 #   - Each one starts from 1, to the bottom left corner of the island is
 #     the address Sky Street 1 Sky Avenue 1.
-address_validator =\
-    re.compile(r"Sky Street (\d+) Sky Avenue (\d+)", flags=re.IGNORECASE)
-def validate_address(address):
-    return True if address_validator.fullmatch(address) else False
 
 # Generates a number in [low, high) with uniform probability.
 def uniformRandom(low, high):
@@ -74,22 +77,24 @@ class WorldMap:
         else:
             self.restaurantLocation = restaurantLocation
 
+    address_validator =\
+        re.compile(r"Sky Street (\d+) Sky Avenue (\d+)",
+                flags=re.IGNORECASE)
+    def validate_address(self, address):
+        match = self.address_validator.fullmatch(address)
+        if not match:
+            return False
+        x, y = int(match.group(1)) - 1, int(match.group(0)) - 1
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return False
+        return True
+
     def is_position(self, v):
         return type(v) == type(0)
     def is_vertex(self, v):
         return type(v) == type(())
-    def to_position(self, v):
-        if self.is_position(v):
-            return v
-        elif self.is_vertex(v):
-            return self.vertex_to_position(v)
-    def to_vertex(self, v):
-        if self.is_vertex(v):
-            return v
-        elif self.is_position(v):
-            return self.position_to_vertex(v)
-    def normalize_vertices(self, vertexList):
-        return [self.to_vertex(x) for x in vertexList]
+    def is_address(self, v):
+        return type(v) == type("") and validate_address(v)
 
     # vertex: A tuple of integers representing the block you're on.
     # Returns: A list of the vertices which are neighbors of vertex.
@@ -109,8 +114,10 @@ class WorldMap:
                 x[1] < self.height]
         if self.is_position(vertex):
             return [self.to_position(x) for x in neighbors]
-        else:
+        elif self.is_vertex(vertex):
             return neighbors
+        elif self.is_address(vertex):
+            return [self.to_address(x) for x in neightbors]
 
     def neighborhood_of_positions(self, vertex):
         return self.neighborhood_of(self.to_position(vertex))
@@ -122,28 +129,66 @@ class WorldMap:
         v1, v2 = self.normalize_vertices([v1, v2])
         return v1 in self.neighborhood_of(v2)
 
-    # The graph representation will be an adjacency matrix after all. I
-    # think ti'll be easier to generate, since this is an undirected
-    # graph. For any block, the matrix position corresponding to that
-    # vertex (x,y) will be x*height + y. This way no two vertices will
-    # map to the same position in the matrix, as y in [0, height).
-
-    # This function takes a vertex and transforms it to a row/column in
-    # the matrix that refers to that vertex. So information about the
-    # edge between v1 and v2 in a matrix will be stored at row
-    # vertex_to_position(v1) and column vertex_to_position(v2) (the
-    # actual order of the vertices doesn't matter since this is an
-    # undirected graph.
+    # The data types that Map will work with:
+    # - vertex: A tuple of integers which refer to a block on the map.
+    #   They're of the form (avenue, street).
+    # - position: An integer representing a vertex in the Map. They're
+    #   necessary for accessing positions on the graph when the graph
+    #   is a list. For any vertex (x, y) the corresponding position is
+    #   x * height + y.
+    # - address: Street addresses representing vertices on the map.
+    #   They're of the form "Sky Street <street-num> Sky Avenue
+    #   <ave-num>. The corresponding vertex is (<ave-num>,
+    #   <street-num>).
     def vertex_to_position(self, v):
         return v[0]*self.height + v[1]
     def position_to_vertex(self, position):
         return (position//self.height, position % self.height)
+    def vertex_to_address(self, vertex):
+        return "Sky Street {} Sky Avenue {}".format(
+                *[x+1 for x in vertex[::-1]])
     def address_to_vertex(self, address):
-        match = address_validator.fullmatch(address)
+        match = self.address_validator.fullmatch(address)
         if match:
-            return int(match.group(1)) - 1, int(match.group(2)) - 1
+            return (int(match.group(2)) - 1, int(match.group(1)) - 1)
     def address_to_position(self, address):
-        return self.vertex_to_position(self.address_to_vertex(address))
+        return self.convert_to(address, 'position')
+    def convert_to(self, vertex, new_type):
+        """Convert the vertex from it's current type to the type specified in the third argument, new_type. new_type may be one of:
+    - 'vertex'
+    - 'position'
+    - 'address'"""
+        identity_function = lambda x: x
+
+        if self.is_vertex(vertex) and new_type == 'vertex' or\
+           self.is_position(vertex)and new_type == 'position' or\
+           self.is_address(vertex) and new_type == 'address':
+            return vertex
+
+        if self.is_vertex(vertex):
+            fromFunc = identity_function
+        elif self.is_address(vertex):
+            fromFunc = self.address_to_vertex
+        elif self.is_position(vertex):
+            fromFunc = self.position_to_vertex
+
+        if new_type == 'vertex':
+            toFunc = identity_function
+        elif new_type == 'position':
+            toFunc = self.vertex_to_position
+        elif new_type == 'address':
+            toFunc = self.vertex_to_address
+
+        return toFunc(fromFunc(vertex))
+
+    # These are here until I get rid of references to them.
+    def to_position(self, v):
+        return self.convert_to(v, 'position')
+    def to_vertex(self, v):
+        return self.convert_to(v, 'vertex')
+    def normalize_vertices(self, vertexList):
+        return [self.to_vertex(x) for x in vertexList]
+        
 
     # Preconditions:
     # - None
@@ -158,9 +203,11 @@ class WorldMap:
         adjacency_matrix = [[None]*num_vertices]*num_vertices
         # Loop over all the pairs of vertices and their neighbors.
         for i in range(0, num_vertices):
-            neighbors = self.neighborhood_of(self.position_to_vertex(i))
-            neighboring_positions =\
-                [self.vertex_to_position(x) for x in neighbors]
+            #neighbors = self.neighborhood_of(self.position_to_vertex(i))
+            #neighboring_positions =\
+                #[self.vertex_to_position(x) for x in neighbors]
+            neighboring_positions = self.neighborhood_of(i)
+
             for neighbor in neighboring_positions:
                 if adjacency_matrix[i][neighbor] == None:
                     weight = self.randFunc()
@@ -191,7 +238,7 @@ class WorldMap:
         if 'graph' not in dir(self):
             self.generate_graph()
         result = shortest_path(
-                    self.graph,
+                    self,
                     self.to_position(self.restaurantLocation),
                     self.to_position(destination))
         # Cut out the terminal vertex from the result, keeping only
@@ -224,7 +271,6 @@ def shortest_path(graph, source, destination=None):
     # vertices.
     frontier = set(graph.neighborhood_of(source))
 
-    #while explored_vertices != vertex_set:
     while len(frontier) != 0:
         #print("Explored Vertices:", explored_vertices)
         #print("Explored Paths:", explored_paths)
@@ -257,6 +303,23 @@ def shortest_path(graph, source, destination=None):
                 frontier.add(vertex)
 
     return explored_paths
+
+# Making this algorithm faster:
+# - Maybe I can put all the possibilities on a priority queue?
+# - The old possibilities don't really go away, and I keep regenerating
+#   them with each iteration.
+# - I also know that I'm exploring paths in nondecreasing order, so if I
+#   ever see a frontier vertex in the neighborhood of another vertex
+#   just discovered, there's no way the path from that vertex to the
+#   frontier vertex is better than the path that I already found
+#   (assuming that this path was found on a previous iteration.
+# - Even further, we only put one vertex at a time in the explored set,
+#   and this graph is assumed to be a simple graph. So vertices
+#   shouldn't pop up more than once in a vertex's neighborhood.
+#   Therefore there's no way that I'll encounter two different ways to
+#   reach the same vertex on the frontier update from a single
+#   generation.
+
 
 # Tests: {{{ ###############################################
 
