@@ -36,7 +36,7 @@ def uniformRandom(low, high):
 # Generates a 1 with 40% probability, 2 with 30% probability, ... so on.
 def lightdayRandom():
     return secrets.choice( [ *[1]*40, *[2]*30, *[3]*15, *[4]*10, *[5]*5 ] )
-# Heavy numbers are more probable here.
+# Larger numbers are more probable here.
 def heavydayRandom():
     return secrets.choice( [ *[1]*20, *[2]*30, *[3]*25, *[4]*15, *[5]*10 ] )
 # Create a table of random things that could happen to an existing map,
@@ -48,16 +48,6 @@ def somethingHappens():
         "shootout" : "set some edges to 5",
     }
 
-# Map representation:
-# - For now, just a dictionary. It'll be large, memory-wise, but there
-#   will only be one of them. There's no duplicating this graph, so it
-#   shouldn't be that bad.
-# - We don't really need to do an adjacency list because adjacency is
-#   fairly obvious. I can make a function to generate the neighborhood
-#   of a vertex based solely on the vertex. 
-# - I'll make a class that'll hold the basic characteristics of how the
-#   graph should look like, then generate graphs based on that with
-#   random weights. The randomness function will be customizable.
 class WorldMap:
 
     # - width, height: integers representing number of blocks.
@@ -101,6 +91,14 @@ class WorldMap:
     # vertex: A tuple of integers representing the block you're on.
     # Returns: A list of the vertices which are neighbors of vertex.
     def neighborhood_of(self, vertex):
+        """Takes in a vertex of the graph and returns a list of all
+        adjacent vertices in the graph. The datatype of the vertex can
+        be any of the datatypes useable by this class:
+        - integer
+        - address (string)
+        - tuple
+        The returned list of neighbors is in the same datatype as the
+        datatype of the vertex passed in."""
         x, y = self.to_vertex(vertex)
         # Every block is adjacent to blocks in cardinal directons
         potentialNeighbors = [ 
@@ -120,11 +118,6 @@ class WorldMap:
             return neighbors
         elif self.is_address(vertex):
             return [self.to_address(x) for x in neightbors]
-
-    def neighborhood_of_positions(self, vertex):
-        return self.neighborhood_of(self.to_position(vertex))
-    def neighborhood_of_vertices(self, vertex):
-        return self.neighborhood_of(self.to_vertex(vertex))
 
     # v1, v2: Vertices, which are tuples of integers.
     def adjacent_to(self, v1, v2):
