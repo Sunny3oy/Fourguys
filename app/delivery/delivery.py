@@ -2,6 +2,8 @@
 import re
 # Random number generation.
 import secrets 
+# Heap-based priority queue
+import heapq
 
 # TODO:
 # - Create package for delivery.
@@ -200,13 +202,20 @@ class WorldMap:
     def generate_graph(self):
         num_vertices = self.width * self.height
         # num_vertices columns, num_vertices rows.
-        adjacency_matrix = [[None]*num_vertices]*num_vertices
+        base_row = [None]*num_vertices
+        adjacency_matrix = []
+        for i in range(0, num_vertices):
+            adjacency_matrix.append(base_row[:])
+        #print(adjacency_matrix)
+
         # Loop over all the pairs of vertices and their neighbors.
         for i in range(0, num_vertices):
             #neighbors = self.neighborhood_of(self.position_to_vertex(i))
             #neighboring_positions =\
                 #[self.vertex_to_position(x) for x in neighbors]
+            adjacency_matrix[i][i] = 0
             neighboring_positions = self.neighborhood_of(i)
+            #print(neighboring_positions)
 
             for neighbor in neighboring_positions:
                 if adjacency_matrix[i][neighbor] == None:
@@ -222,7 +231,7 @@ class WorldMap:
 
     # Get an edge weight.
     def edge(self, v1, v2):
-        return self.graph[v1][v2]
+        return self.graph[self.to_position(v1)][self.to_position(v2)]
 
     # Set an edge weight.
     def set_edge(self, v1, v2, weight):
@@ -257,50 +266,61 @@ class WorldMap:
 # - If destination is a vertex in the graph, then it returns one path
 #   from the source to the destination.
 def shortest_path(graph, source, destination=None):
-    # Each entry of explored is of the form [vertex, path, weight],
+    # Each entry of explored is of the form (weight, vertex, path),
     # where:
     # - vertex is the terminal vertex in the path.
     # - path is a list of vertices that specify a path through the
     #   graph, starting from source and ending in vertex.
     # - weight is the weight of the path (the sum of the weights of the
     #   edges in the path).
-    explored_paths = [[source, [source], 0]]
+    # - Order of entries is actually important, because frontier is a
+    #   priority queue, and it sorts by the first element.
+    explored_paths = [(0, source, [source])]
     explored_vertices = {source}
 
     # The set of unexplored vertices in the neighborhood of explored
     # vertices.
-    frontier = set(graph.neighborhood_of(source))
+    frontier_set = set(graph.neighborhood_of(source))
+    # The weights here are negative because heapq is a minheap,
+    # so the smallest (most negative) weights will actually be the most
+    # positive weights for paths.
+    frontier_queue =\
+        [(  explored_paths[0][0] + graph.edge(source, x),
+            x,
+            [ *explored_paths[0][2], x ] )
+            for x in graph.neighborhood_of(source)]
+    heapq.heapify(frontier_queue)
 
-    while len(frontier) != 0:
+    while len(frontier_set) != 0:
+        best_path = heapq.heappop(frontier_queue)
+
         #print("Explored Vertices:", explored_vertices)
         #print("Explored Paths:", explored_paths)
-        #print("Frontier:", frontier)
+        #print("Frontier:", frontier_set)
+        #print("best path:", real_path)
 
-        next_paths = []
-        for vertex in frontier:
-            explored_neighbors = [x for x in explored_paths
-                    if x[0] in graph.neighborhood_of(vertex)]
-            #print("Explored Neighbors:", explored_neighbors)
-            # Get best path to this particular frontier vertex.
-            best_path = min([\
-                [vertex,
-                [ *x[1], vertex ],
-                x[2] + graph.edge(x[0], vertex)]
-                for x in explored_neighbors],
-                key=lambda x: x[2])
-            next_paths.append(best_path)
-
-        # Choose the best path out of the best paths to frontier
-        # vertices.
-        chosen_path = min(next_paths, key=lambda x: x[2])
-        if chosen_path[0] == destination:
-            return chosen_path
-        explored_paths.append(chosen_path)
-        explored_vertices.add(chosen_path[0])
-        frontier.remove(chosen_path[0])
-        for vertex in graph.neighborhood_of(chosen_path[0]):
-            if vertex not in explored_vertices:
-                frontier.add(vertex)
+        if best_path[1] == destination:
+            return best_path
+        explored_paths.append(best_path)
+        explored_vertices.add(best_path[1])
+        frontier_set.remove(best_path[1])
+        for vertex in graph.neighborhood_of(best_path[1]):
+            if not vertex in explored_vertices:
+                path_to_vertex = (
+                    best_path[0] + graph.edge(best_path[1], vertex),
+                    vertex,
+                    [ *best_path[2], vertex ] 
+                )
+                if vertex in frontier_set:
+                    previous_way, =\
+                        [x for x in frontier_queue if x[1] == vertex]
+                    if previous_way[0] > path_to_vertex[0]:
+                        frontier_queue.remove(previous_way)
+                        frontier_queue.append(path_to_vertex)
+                        heapq.heapify(frontier_queue)
+                else:
+                    frontier_set.add(vertex)
+                    heapq.heappush(frontier_queue, path_to_vertex)
 
     return explored_paths
 
@@ -341,4 +361,46 @@ def validate_address_test():
     else:
         return failed
 
+def validate_shortest_path():
+    Map = WorldMap(3,3)
+    Map.graph = [
+        #[None, None, None, None, None, None, None, None, None],
+       #[0   , 1   , 2   , 3   , 4   , 5   , 6   , 7   , 8   ],
+        [None, 3   , None, 2   , None, None, None, None, None],
+        [3   , None, 1   , None, 4   , None, None, None, None],
+        [None, 1   , None, None, None, 1   , None, None, None],
+        [2   , None, None, None, 2   , None, 1   , None, None],
+        [None, 4   , None, 2   , None, 1   , None, 5   , None],
+        [None, None, 1   , None, 1   , None, None, None, 4   ],
+        [None, None, None, 1   , None, None, None, 3   , None],
+        [None, None, None, None, 5   , None, 3   , None, 2   ],
+        [None, None, None, None, None, 4   , None, 2   , None],
+    ]
+    # Shortest Paths relative to 0.
+    real_shortest_paths  = [
+        (0, 0, [0]),
+        (2, 3, [0, 3]),
+        (3, 1, [0, 1]),
+        (3, 6, [0, 3, 6]),
+        (4, 2, [0, 1, 2]),
+        (4, 4, [0, 3, 4]),
+        (5, 5, [0, 1, 2, 5]),
+        (6, 7, [0, 3, 6, 7]),
+        (8, 8, [0, 3, 6, 7, 8]),
+    ]
+    given_shortest_paths = shortest_path(Map, 0)
+
+    if real_shortest_paths == given_shortest_paths:
+        return True
+
+    print(*Map.graph, sep='\n')
+    print(*shortest_path(Map, 0), sep='\n')
+    print(*real_shortest_paths, sep='\n')
+
 # }}} ######################################################
+
+if __name__ == "__main__":
+    Map = WorldMap(30,30)
+    Map.generate_graph()
+    print(*Map.graph, sep='\n')
+    print(*shortest_path(Map, 0), sep='\n')
