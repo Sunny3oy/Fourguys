@@ -21,14 +21,19 @@ def rebuild_database():
     # These files should be in the dummy-data directory (or whichever
     # directory is currently the 'datadir'.
     dummy_files = [
-        { 'model': FoodItem, 'file': 'menuitems.csv' },
-        { 'model': Customer, 'file': 'users.csv' },
-        { 'model': EmployeeType, 'file': 'emplTypes.csv' },
-        { 'model': Employee, 'file': 'employees.csv' },
+        {'model': EmployeeType, 'file': 'emplTypes.csv'},
+        {'model': SalaryBase, 'file': 'salaryBases.csv'},
+        {'model': Employee, 'file': 'employees.csv'},
+        {'model': Menu, 'file': 'menus.csv'},
+        {'model': FoodItem, 'file': 'foodItems.csv'},
+        {'model': MenuItem, 'file': 'menuItems.csv'},
+        {'model': Customer, 'file': 'customers.csv'},
+        {'model': Order, 'file': 'orders.csv'},
+        {'model': OrderDetail, 'file': 'orderDetails.csv'}
     ]
     for thing in dummy_files:
         filename = path.join(basedir, datadir, thing['file'])
-        with open(filename, newline='') as csvfile:
+        with open(filename) as csvfile:
             reader = csv.DictReader(csvfile, skipinitialspace=True)
             for row in reader:
                 new_item = thing['model'](**row)

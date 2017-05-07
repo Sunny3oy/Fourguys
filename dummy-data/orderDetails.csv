@@ -1,0 +1,6 @@
+orderID, menuID, itemID, itemQty, itemRating, itemComments
+1, 2, 1, 10, 5, "Amazingly delicious cheeseburgers. I wolfed them all in a heartbeat"
+1, 1, 2, 1, 5, "The doge is absolutely amazing. Very wow. Much good"
+2, 1, 2, 4, 5, "These doge are absolutely terrific. Nothing beats fresh wow"
+2, 2, 3, 10, 4, "This beverage is the answer to quenching your thirst while simultaneously lubricating" your esophagus
+2, 1, 1, 5, 5,  "These cheeseburgers are so good, my cholesterol level has never been lower"
