@@ -59,6 +59,7 @@ class FoodItem(db.Model):
     itemDesc = db.Column(db.Text)
     itemPrice = db.Column(db.REAL)
     itemPict = db.Column(db.String(50))
+    itemRating = db.Column(db.INTEGER)
 
 class Order(db.Model):
     __tablename__ = 'orders'

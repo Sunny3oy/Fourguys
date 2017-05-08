@@ -35,35 +35,59 @@ def home():
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
-    form = menu1()
-    # button = buttonform()
-    doge = 0
-    sumitem = 0
-    if form.validate_on_submit():
-        doge = 1
-        total = [0,0,0]
-        databaseprice1 = FoodItem.query.filter_by(itemID=1).first()
-        databaseprice2 = FoodItem.query.filter_by(itemID=2).first()
-        databaseprice3 = FoodItem.query.filter_by(itemID=3).first()
-        total[0] = databaseprice1.itemPrice * form.qty0.data
-        total[1] = databaseprice2.itemPrice * form.qty1.data
-        total[2] = databaseprice3.itemPrice * form.qty2.data
-        sumitem = sum(total)
-        print (total[0],total[1],total[2])
-        #return render_template("menu.html", form=form, databaseitems=FoodItem.query.all(), doge=doge,total = total,sumitem = sumitem)
+
+    doge = 0                  #0 if no shopping cart, 1 otherwise
+    sumitem = 0               #Saves total sum of food items
+    numbers = [0, 1, 2, 3, 4] #Used to render 'rating hearts'
+    validate = True           #Used to validate ALL forms, if at least one is not validated it becomes false.
+
+    #Place Order and Shopping Cart Buttons
+    placebutton = PlaceButton(prefix="myplaceorder")
+    shopbutton = ShopButton(prefix="myshopcart")
+
+
+    #List that will hold n forms, where n is the size of the FoodItems table
+    n = 16 #for now fixed n (Need 'n' to be the size of the FoodItems table)
+    formlist = []
+
+    #The following loop creates a list of forms.
+    for i in range(0,n):
+        ithform = menu1(prefix="form" + str(i)) #Create the ith form with unique prefix
+        formlist.append(ithform)                #Append to form list
+
+    #Validate all forms
+    for i in formlist:
+        validate = validate and i.validate_on_submit()
+
+    if validate and shopbutton.submit.data:
+
+        doge = 1    #Shopping Cart should be displayed
+
+        #The following gets the prices for all food items from db
+        itemPrices = []
+        for i in range(1,n+1):
+            itemPrices.append(FoodItem.query.filter_by(itemID=i).first().itemPrice)
+
+        #Dictonary of subtotals for each item.
+        subtotals = []
+        for i in range(0,n):
+            item_subtotal = itemPrices[i] * formlist[i].qty.data
+            subtotals.append(item_subtotal)
+
+        sumitem = sum(subtotals)    #Get total
 
         # Create a key-value pair in the session dictionary to store the total
-        session['ProductTotal'] = sum(total)
+        session['ProductTotal'] = sum(subtotals)
         # This key-value pair ensures that when the checkout page is refreshed,
         # the customer is not charged more than once
         session['orderMade'] = False
-        if current_user.is_authenticated:
-            return redirect(url_for('checkout'))
-        else:
-            return '<p> Hold on!!! You need to login first</p>'
-    # elif button.validate_one_submit():
-    #     return check(sumitem)
-    return render_template("menu.html", form=form,databaseitems = FoodItem.query.all(), doge=doge,sumitem = sumitem)
+
+        return render_template("menu.html", formlist=formlist, databaseitems=FoodItem.query.all(), doge=doge,total = subtotals,sumitem = sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
+
+    elif placebutton.submit.data:
+        return checkout()
+
+    return render_template("menu.html", formlist=formlist, databaseitems=FoodItem.query.all(), doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
 @app.route('/checkout')
 @login_required

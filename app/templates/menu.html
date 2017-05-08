@@ -1,76 +1,128 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+
 {% block title %}
-menus
+    Food Items
 {% endblock %}
+
 {% block styles %}
 {{super()}}
 <link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
+<link href="https://fonts.googleapis.com/css?family=Allerta+Stencil" rel="stylesheet">
+
+    <style>
+    {#  Using FontAwesome for heart icons #}
+     @import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css);
+     input[type="text"] {
+       width: 50px;
+         background-color: lightcyan;
+
+     }
+    p{
+        font-family: "Allerta Stencil";
+        font-size: 14px;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 300;
+        line-height: 16px;
+    }
+    h1{
+        font-family: "Allerta Stencil";
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 700;
+        line-height: 16px;
+    }
+
+    </style>
 {% endblock %}
+
 {% block content %}
     <ul class="list-inline">
-  <li><a href="/">Home</a></li>
-  <li><a href="menu">Menu</a></li>
-  <li><a href="contact">Contact Us</a></li>
-  <li><a href="signup">Sign up</a></li>
-  <li><a href="login">Log in</a></li>
+       <li><a href="/">Home</a></li>
+       <li><a href="menu">Menu</a></li>
+       <li><a href="contact">Contact Us</a></li>
+       <li><a href="signup">Sign up</a></li>
+       <li><a href="login">Log in</a></li>
     </ul>
-     <h1> Shopping Cart</h1>
-    {% if doge == 0 or sumitem == 0%}
-        <h1> Cart is empty </h1>
+
+
+
+    {% if doge == 0 or sumitem == 0 %}
+        <h1><i class="fa fa-cart-arrow-down" aria-hidden="true"></i> Cart is Empty </h1>
     {% else %}
+
+        <h1 style="margin-bottom: 25px"><i class="fa fa-cart-plus" aria-hidden="true"></i> Shopping Cart</h1>
         <div class="container-fluid">
         <form method="post" action="/menu">
 
         <div class="row">
         <div class="col-md-4">
-    {% for items in databaseitems%}
-        {{ form.hidden_tag() }}
-        <p>{{ items.itemName }}</p>
-    {% endfor %}
-    </div>
+
+       {% for items in databaseitems%}
+           {% if total[loop.index0] == 0 %}
+                {#DON'T RENDER THIS FOOD BECAUSE SUBTOTAL FOR IT IS ZERO  #}
+            {% else %}
+                <p>{{ items.itemName }}</p>
+            {% endif %}
+        {% endfor %}
+        </div>
+
     <div class="col-md-4">
-        {{ form.hidden_tag() }}
         {% for items in total %}
-            <p>Total Price for this item:{{ items }}</p>
+            {% if total[loop.index0] == 0 %}
+                {#DON'T RENDER THIS FOOD BECAUSE SUBTOTAL FOR IT IS ZERO  #}
+            {% else %}
+                <p>Total Price for this Item: ${{ total[loop.index0] }}</p>
+            {% endif %}
         {% endfor %}
     </div>
     </div>
-    <h1> Total Price</h1>
-    <h2>${{ sumitem }}0</h2>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Checkout</button>
+    <h1><i class="fa fa-credit-card" aria-hidden="true"></i> Total Price</h1>
+    <h2>${{ sumitem }}</h2>
+{#    <button class="btn btn-lg btn-primary btn-block" type="submit">Checkout</button>#}
+        {{ placebutton.hidden_tag() }}
+        {{ wtf.form_field(placebutton.submit) }} {# Place Order Button#}
     </form>
     </div>
     {% endif %}
 <br>
-    <h1> Menu</h1>
-    <div class="container-fluid">
+
+    <h1 style="margin-left: 530px; margin-bottom: 40px; font-size: 61px"><i class="fa fa-cutlery" aria-hidden="true"></i> Menu</h1>
+
     <form method="post" action="/menu">
-    <div class="row">
-    <div class="col-md-4">
-    {% for items in databaseitems%}
-        {{ form.hidden_tag() }}
-        <p>{{ items.itemName }}</p>
-        <p>Price:${{ items.itemPrice }}0</p>
-        <img src="static/{{ items.itemPict }}" alt="FBI">
+
+    <div>
+    {% for items in databaseitems %}
+        <div class="col-md-3" > {#col-md-n is what puts them in columns, n can be 3, 4   #}
+        <p style="font-size: 20px"><strong>{{ items.itemName }}</strong></p>
+        <p>Price: ${{ items.itemPrice }}</p>
+        <img src="static/{{ items.itemPict }}" height="200" width="285" style="user-select: none">
+        <div style="background-color: #9affcc; border-radius: 8px; margin-top: 5px">
         <p>{{ items.itemDesc }}</p>
-            {{ form.hidden_tag() }}
-        {% if loop.index == 1 %}
-            {{ form.hidden_tag() }}
-            {{ wtf.form_field(form.qty0)}}
-        {% elif loop.index == 2 %}
-            {{ form.hidden_tag() }}
-            {{ wtf.form_field(form.qty1)}}
-        {% else %}
-            {{ form.hidden_tag() }}
-            {{ wtf.form_field(form.qty2)}}
-        {% endif %}
+            {% for number in numbers %}
+                {% if number < items.itemRating %}
+                   <i class="fa fa-heart" style="color: #ff9acd" aria-hidden="true"></i>
+                {% else %}
+                   <i class="fa fa-heart-o" style="color: #ff9acd" aria-hidden="true"></i>
+                {% endif %}
+            {% endfor %}
+            <p>Rating: {{ items.itemRating }}</p>
+        </div>
+
+        {{ formlist[loop.index0].hidden_tag() }}
+        {{ wtf.form_field(formlist[loop.index0].qty)}}
+       </div>
+
     {% endfor %}
+
+
     </div>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Add to Cart</button>
-    </div>
+
+    {{ shopbutton.hidden_tag() }}
+    {{ wtf.form_field(shopbutton.submit) }} {# Shopping Cart Button#}
+
     </form>
-    </div>
 
     <br>
 
