@@ -1,0 +1,28 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}
+addmoney
+{% endblock %}
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
+{% endblock %}
+{% block content %}
+    <ul class="list-inline">
+  <li><a href="/">Home</a></li>
+  <li><a href="menu">Menu</a></li>
+  <li><a href="contact">Contact Us</a></li>
+  <li><a href="signup">Sign up</a></li>
+  <li><a href="login">Log in</a></li>
+    </ul>
+
+<h1> Adding Money </h1>
+  <ul>
+    <h1> Your account have {{ user.acctBal }}! </h1>
+      <form class="form-signin" method="post" action="/addmoney">
+      <li>{{ form.hidden_tag() }}
+      {{ wtf.form_field(form.addmoney) }}</li>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Add Amount</button>
+      </form>
+    </ul>
+{% endblock %}

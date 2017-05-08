@@ -35,7 +35,6 @@ def home():
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
-
     doge = 0                  #0 if no shopping cart, 1 otherwise
     sumitem = 0               #Saves total sum of food items
     numbers = [0, 1, 2, 3, 4] #Used to render 'rating hearts'
@@ -97,6 +96,7 @@ def checkout():
     # Otherwise, process the order.
 
     # If the checkout menu is refreshed, the user will be redirected to menu page
+    diffmessg = None
     cartTotal = session.get('ProductTotal')
 
     if cartTotal == 0:
