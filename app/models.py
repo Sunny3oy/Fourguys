@@ -1,6 +1,7 @@
 from app import app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from sqlalchemy import func, desc
 db = SQLAlchemy(app)
 
 
@@ -19,7 +20,7 @@ class Customer(UserMixin, db.Model):
     acctBal = db.Column(db.REAL)
     numWarning = db.Column(db.Integer)
     statusVIP = db.Column(db.Boolean)
-    deactivated = db.Column(db.Boolean)
+    activated = db.Column(db.Boolean, default=False)
     password = db.Column(db.Text)
 
     def __repr__(self):
@@ -87,6 +88,7 @@ class Order(db.Model):
     username = db.Column(db.String(15), db.ForeignKey('customers.username'))
     delivererID = db.Column(db.Integer, db.ForeignKey('employees.id'))
     totalPrice = db.Column(db.REAL)
+    isDelivered = db.Column(db.Boolean)
 
     custRel = db.relationship('Customer', backref='orderRel')
     dboyRel = db.relationship('Employee', backref='orderRel')
@@ -154,11 +156,39 @@ class SalaryBase(db.Model):
         return '<salaryID: %s, hour base: %s>' % (self.salaryID, self.hourBase)
 
 
+class Complaint(db.Model):
+    __tablename__ = 'complaints'
+    complaintID = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(15), db.ForeignKey('customers.username'))
+    chefID = db.Column(db.Integer, db.ForeignKey('employees.id'))
+    orderID = db.Column(db.Integer, db.ForeignKey('orders.orderID'))
+    comment = db.Column(db.Text)
+    isGood = db.Column(db.Boolean)
+    accepted = db.Column(db.Boolean)
+
+    custRel = db.relationship(Customer, backref='complaintRel')
+    emplRel = db.relationship(Employee, backref='complaintRel')
+    orderRel = db.relationship(Order, backref='complaintRel')
+
+    def __repr__(self):
+        return '<complaintID: %s, isGood: %s>' % (self.complaintID, self.isGood)
+
+
 # MENU-RELATED QUERIES
 
 # returns all food items that are available in the database
 def get_all_food_items():
     return FoodItem.query.all()
+
+
+# returns the five most ordered food items
+def get_five_most_popular():
+    stmt = db.session.query(OrderDetail.itemID, func.count(OrderDetail.itemID).label('total'))\
+        .group_by(OrderDetail.itemID)\
+        .limit(5).subquery('stmt')
+    return FoodItem.query\
+        .join(stmt, stmt.c.itemID == FoodItem.itemID)\
+        .order_by(desc(stmt.c.total)).all()
 
 
 # returns all food items that are part of a menu
@@ -207,24 +237,99 @@ def get_order_details(orderID):
         .filter(OrderDetail.orderID == orderID).all()
 
 
-# rate a specific food item that has been ordered
-def rate_food_item_ordered(orderID, itemID, rating):
-    food_item = OrderDetail.query\
+# returns the food item detail for an order
+def get_food_item_from_order(orderID, itemID):
+    return OrderDetail.query\
         .filter(OrderDetail.orderID == orderID, OrderDetail.itemID == itemID)\
         .first()
+
+
+# update the rating for a food item ordered
+# as part of an order
+def rate_food_item_ordered(orderID, itemID, rating):
+    food_item = get_food_item_from_order(orderID, itemID)
     food_item.itemRating = rating
     db.session.add(food_item)
     db.session.commit()
 
 
+# update the comment for a food item ordered
+# as part of an order
 def comment_food_item_ordered(orderID, itemID, comment):
-    pass
+    food_item = get_food_item_from_order(orderID, itemID)
+    food_item.itemComments = comment
+    db.session.add(food_item)
+    db.session.commit()
 
-# returns all orders that has been assigned to a delivery person
+
+# post a new complaint for a specific order and/or chef
+def make_complaint(orderID, chefID, username, comments, isGood):
+    stmt = Complaint()
+    stmt.orderID = orderID
+    stmt.chefID = chefID
+    stmt.username = username
+    stmt.comment = comments
+    stmt.isGood = isGood
+    db.session.add(stmt)
+    db.session.commit()
+
+# CHEF-RELATED QUERIES
+
+# calculate the average rating of food item
+# associated with a menu from all the records
+# in the `order_details` table
+def get_cumulative_food_item_rating(itemID, menuID):
+    stmt = db.session.query(func.avg(OrderDetail.itemRating))\
+        .filter(OrderDetail.itemID == itemID, OrderDetail.menuID == menuID)\
+        .scalar()
+    return round(stmt)
+
+
+# DELIVERY BOY QUERY
+
+# returns all orders that has been assigned
+# to a delivery person
 def get_all_orders_by_delivery_person(emplID):
     return Order.query\
         .filter(Order.delivererID == emplID).all()
 
 
-def get_cumulative_food_item_rating(foodItem, chefID):
-    pass
+# allow the delivery boy to check that
+# the order has been successfully delivered
+def check_delivered(orderID):
+    stmt = Order.query.filter(Order.orderID == orderID).first()
+    stmt.isDelivered = True
+    db.session.add(stmt)
+    db.session.commit()
+
+
+# MANAGER-RELATED QUERIES
+
+# accept the complaint that has been posted
+# by a customer and increment the number of complaint
+# for the corresponding employee
+def accept_complaint(complaintID):
+    stmt = Complaint.query.filter(Complaint.complaintID == complaintID)
+    stmt.isAccepted = True
+    db.session.add(stmt)
+    db.session.commit()
+
+
+# decline the complaint that has been posted by a customer
+# and increment the number of warning to that customer by one
+def decline_complaint(complaintID):
+    stmt = Complaint.query.filter(Complaint.complaintID == complaintID).first()
+    stmt.isAccepted = False
+    stmt2 = Customer.query.filter(Customer.username == stmt.username)
+    stmt2.numWarning += 1
+    db.session.add(stmt, stmt2)
+    db.session.commit()
+
+
+# deactivate a customer account
+def deactivate_account(username):
+    stmt = Customer.query.filter(Customer.username == username).first()
+    stmt.activated = False
+    db.session.add(stmt)
+    db.session.commit()
+
