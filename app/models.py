@@ -39,6 +39,8 @@ class Menu(db.Model):
 
     emplRel = db.relationship('Employee', backref='menuRel')
 
+# A relationship between menus and food items. States which food items
+# are available in which menus.
 class MenuItem(db.Model):
     __tablename__ = 'menu_items'
     menuItemID = db.Column(db.Integer, primary_key=True)
@@ -52,6 +54,8 @@ class MenuItem(db.Model):
     menuRel = db.relationship('Menu', backref='menuItemRel')
     foodItemRel = db.relationship('FoodItem', backref='menuItemRel')
 
+# A table of different food items. Has the basic characteristics of
+# food.
 class FoodItem(db.Model):
     __tablename__ = 'food_items'
     itemID = db.Column(db.Integer, primary_key=True)
