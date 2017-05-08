@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, IntegerField, SubmitField
 from wtforms.validators import InputRequired, Email, Length
 
 class signup(FlaskForm):
@@ -20,6 +20,12 @@ class login1(FlaskForm):
     remember = BooleanField('Remember me')
 
 class menu1(FlaskForm):
-    qty0 = IntegerField('qty', validators=[InputRequired()], default=0)
-    qty1 = IntegerField('qty', validators=[InputRequired()], default=0)
-    qty2 = IntegerField('qty', validators=[InputRequired()], default=0)
+    qty = IntegerField('qty', validators=[InputRequired()], default=0)
+
+class PlaceButton(FlaskForm):
+    submit = SubmitField("Place Order")
+
+class ShopButton(FlaskForm):
+    submit = SubmitField("Add to Cart")
+
+

@@ -82,6 +82,7 @@ class FoodItem(db.Model):
     itemDesc = db.Column(db.Text)
     itemPrice = db.Column(db.REAL)
     itemPict = db.Column(db.String(50))
+    itemRating = db.Column(db.INTEGER)
 
     def __repr__(self):
         return '<itemID: %s, itemName: %s>' % (self.itemID, self.itemName)

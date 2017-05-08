@@ -1,4 +1,17 @@
-itemID, itemName, itemPrice, itemDesc, itemPict
-1, Cheeseburger, 2, cheapass burger, cheeseburger.png
-2, Doge, 250, Limited time offer!, doge.jpg
-3, water or oil?, 1, Might be water or oil, wateroil.jpeg
+itemID, itemName, itemPrice, itemDesc, itemPict, itemRating
+1, Cheeseburger, 1, Cheapass Burger...probably the only item you can easily afford from our sophisticated list. Cheap but tasty enough., cheeseburger.png, 4
+2, Doge, 255, Limited time offer! Who doesn't want Doge while ordering food. Don't let this opportunity go. Don't eat dog please buy some food for it., doge.jpg, 5
+3, Water or Oil?, 5, Might be water or oil. Either one tastes good by itself but not together in the same cup. Try it now with our exotic dishes., wateroil.jpeg, 3
+4, Food in a Bowl, 1, An unknown delicacy in an elegant bowl. No one knows how it was made or who made it but eating it provides unlimited strength. , f1.jpg, 1
+5, Mystery Soup, 2, At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque., f2.jpg, 4
+6, Poisoned Cheeseburger, 3, Similique sunt in culpa qui officia deserunt mollitia animi id est laborum et dolorum fuga. Et harum quidem rerum., f3.jpg, 5
+7, No More Fries?!, 4, Nam libero tempore cuf soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere., f4.jpg, 2
+8, Fancy Item, 5, Omnis voluptas assumenda es omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut., f5.jpg, 4
+9, Salsa Tacos, 60, Eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a., f6.jpg, 1
+10, Meat le Fry, 777, Ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat tenepl., f7.jpg, 3
+11, Reviving Juice, 82, Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia consequuntur magni., f8.jpg, 5
+12, Sweet Soup, 9, Neque porro quisquam est qui dolorem ipsum quia dolor sit amet consectetur adipisci velit numquam eius., f9.jpg, 2
+13, Millionaire Breakfast, 1000, Incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam rerum fac dis., f10.jpg,0
+14, Heavenly Dessert, 234, A dessert from heaven. The ingredients are impossible to get. Eating it is a one time life experience. ,f11.jpg,5
+15, Magic Dumplings, 121, Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur., f12.jpg,4
+16, Infinite Noodles, 24, Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id., f13.jpg,3
