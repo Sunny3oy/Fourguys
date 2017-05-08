@@ -53,6 +53,8 @@ class Menu(db.Model):
         return '<menuID: %s, menu: %s>' % (self.menuID, self.menuName)
 
 
+# A relationship between menus and food items. States which food items
+# are available in which menus.
 class MenuItem(db.Model):
     __tablename__ = 'menu_items'
     menuItemID = db.Column(db.Integer, primary_key=True)
@@ -66,10 +68,13 @@ class MenuItem(db.Model):
     menuRel = db.relationship('Menu', backref='menuItemRel')
     foodItemRel = db.relationship('FoodItem', backref='menuItemRel')
 
+
     def __repr__(self):
         return '<menuID: %s, itemID: %s>' % (self.menuID, self.itemID)
 
 
+# A table of different food items. Has the basic characteristics of
+# food.
 class FoodItem(db.Model):
     __tablename__ = 'food_items'
     itemID = db.Column(db.Integer, primary_key=True)

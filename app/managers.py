@@ -11,7 +11,13 @@ from .models import *
 #   function will run.
 # - When new models are added, and there's dummy data to fill it, a new
 #   dictionary should be made in the dummy_files array that maps the
-#   model to the dummy data file.
+#   model to the dummy data file. The models are imported from the
+#   statement `from .models import *`, and you map the model itself to a
+#   dummy-data file. The rebuild_database handles the logic of filling
+#   the tables up.
+# - To keep this working correctly, the titles of the columns (the first
+#   row in the csv file) should match the keys of the models exactly:
+#   spaces, case, everything.
 @manager.command
 def rebuild_database():
     import csv
@@ -33,7 +39,10 @@ def rebuild_database():
     ]
     for thing in dummy_files:
         filename = path.join(basedir, datadir, thing['file'])
-        with open(filename) as csvfile:
+        with open(filename, newline='') as csvfile:
+            # skipinitialspace for skipping spaces right after commas
+            # (but not before commas).
+
             reader = csv.DictReader(csvfile, skipinitialspace=True)
             for row in reader:
                 new_item = thing['model'](**row)
