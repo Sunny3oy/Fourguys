@@ -136,6 +136,7 @@ class Employee(UserMixin, db.Model):
     numComplaint = db.Column(db.Integer)
     payGrade = db.Column(db.REAL)
     password = db.Column(db.Text)
+    activated = db.Column(db.Boolean, default=True)
 
     __table_args__ = (db.CheckConstraint(sqltext='numComplaint BETWEEN 0 and 3',
                                          name='complaint_range'),)
@@ -350,17 +351,26 @@ def deactivate_account(username):
     db.session.commit()
 
 
-def increment_customer_warning(username):
-    pass
-
-
+# increase the pay grade of the employee
 def promote_employee(emplID):
-    pass
+    stmt = Employee.query.filter(Employee.id == emplID).first()
+    stmt.payGrade += 1
+    db.session.add(stmt)
+    db.session.commit()
 
 
+# decrease the pay grade of the employee
 def demote_employee(emplID):
-    pass
+    stmt = Employee.query.filter(Employee.id == emplID).first()
+    stmt.payGrade -= 1
+    db.session.add(stmt)
+    db.session.commit()
 
 
+# deactivate the employee account;
+# effectively firing them
 def fire_employee(emplID):
-    pass
+    stmt = Employee.query.filter(Employee.id == emplID).first()
+    stmt.activated = False
+    db.session.add(stmt)
+    db.session.commit()
