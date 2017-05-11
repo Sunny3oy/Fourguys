@@ -1,11 +1,38 @@
+from functools import wraps
+
 from .forms import *
 from .models import *
-from flask import render_template, flash, url_for, redirect, session
+from flask import render_template, flash, url_for, redirect, session, current_app
 from flask_login import *
+
+
+# override the built-in login_required() function
+def login_required(role='ANY'):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return current_app.login_manager.unauthorized()
+            user_role = current_user.get_user_type()
+            if (user_role != role) and (role != 'ANY'):
+                return current_app.login_manager.unauthorized()
+            return f(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
+
+# @app.login_manager.user_loader
+# def load_user(user_id):
+#     print(user_id)
+#     return Customer.query.get(int(user_id))
 
 @app.login_manager.user_loader
 def load_user(user_id):
-    return Customer.query.get(int(user_id))
+    print(user_id)
+    if int(user_id) > 1000: #Only employees have ID's > 1000
+        return Employee.query.get(int(user_id))
+    else:
+        return Customer.query.get(int(user_id))
 
 @app.route('/signup',methods=['GET', 'POST'])
 def signup1():
@@ -28,8 +55,20 @@ def signup1():
 @app.route('/',methods=['GET', 'POST'])
 def home():
     check = current_user.is_authenticated
+    #typeofUser=""
+    if check:
+        typeofUser = current_user.get_user_type()
+        if typeofUser == "CUSTOMER":
+            numberType = 0
+        elif typeofUser == "MANAGER":
+            numberType = 1
+        elif typeofUser == "CHEF":
+            numberType = 2
+        else:
+            numberType = 3  # Deliver
+
     if current_user.is_authenticated:
-        return render_template("home.html",user = current_user.firstName,check = check)
+        return render_template("home.html",user = current_user.firstName,check = check,numberType=numberType)
     else:
         return render_template("home.html", user = "Guest", check = check)
 
@@ -40,37 +79,62 @@ def menu():
     numbers = [0, 1, 2, 3, 4] #Used to render 'rating hearts'
     validate = True           #Used to validate ALL forms, if at least one is not validated it becomes false.
 
+    #This function inputs the items of a menu and a keyword.
+    #Creates the number of forms neccesary for the specific menu list using the keyword.
+    def make_forms_for_items(listOfItems,keyword):
+        formlist = []
+        for i in range (0,len(listOfItems)):
+          form = menu1(prefix=str(keyword)+str(i))  #Create a unique form with the keyword for each menu item
+          formlist.append(form)
+        return formlist
+
+    #Get menus names, menu descriptions,list of menu items and forms forms for menu belonging to that menu
+    #To do this we will form triplets (menuName,menuDesc,listOfMenuItems,forms)
+    menus = []
+
+    for i in range (1,get_table_size(Menu) + 1):
+        menuName = Menu.query.filter_by(menuID=i).first().menuName
+        menuDesc = Menu.query.filter_by(menuID=i).first().menuDesc
+        menuID = Menu.query.filter_by(menuID=i).first().menuID
+        listOfMenuItems = get_all_food_items_by_menu(menuID)
+        formlist = make_forms_for_items(listOfMenuItems,i)
+
+        #Append to menus[]
+        menus.append((menuName,menuDesc,listOfMenuItems,formlist))
+
+    #print(menus)
+
     #Place Order and Shopping Cart Buttons
     placebutton = PlaceButton(prefix="myplaceorder")
     shopbutton = ShopButton(prefix="myshopcart")
 
-
-    #List that will hold n forms, where n is the size of the FoodItems table
-    n = 16 #for now fixed n (Need 'n' to be the size of the FoodItems table)
-    formlist = []
-
-    #The following loop creates a list of forms.
-    for i in range(0,n):
-        ithform = menu1(prefix="form" + str(i)) #Create the ith form with unique prefix
-        formlist.append(ithform)                #Append to form list
-
     #Validate all forms
-    for i in formlist:
-        validate = validate and i.validate_on_submit()
+    for i in range(0,len(menus)):
+        for j in range (0,len(menus[i][3])):
+            validate = validate and menus[i][3][j].validate_on_submit()
 
     if validate and shopbutton.submit.data:
 
         doge = 1    #Shopping Cart should be displayed
 
-        #The following gets the prices for all food items from db
+        #Gets names and prices for each of the menu items in all menus
+        foodnames = []
         itemPrices = []
-        for i in range(1,n+1):
-            itemPrices.append(FoodItem.query.filter_by(itemID=i).first().itemPrice)
+        for menu in menus:
+            for fooditem in menu[2]:
+                foodnames.append(fooditem.itemName)
+                itemPrices.append(fooditem.itemPrice)
 
-        #Dictonary of subtotals for each item.
+        #Gets the quantity for each form the user inputs
+        formsInput =[]
+        for menu in menus:
+            for thisform in menu[3]:
+                formsInput.append(thisform.qty.data)
+
+        #Get subtotals
         subtotals = []
-        for i in range(0,n):
-            item_subtotal = itemPrices[i] * formlist[i].qty.data
+        for i in range(0, len(itemPrices)):
+            item_subtotal = itemPrices[i] * formsInput[i]
             subtotals.append(item_subtotal)
 
         sumitem = sum(subtotals)    #Get total
@@ -81,15 +145,15 @@ def menu():
         # the customer is not charged more than once
         session['orderMade'] = False
 
-        return render_template("menu.html", formlist=formlist, databaseitems=FoodItem.query.all(), doge=doge,total = subtotals,sumitem = sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
+        return render_template("menu.html",databaseitems=menus,foodnames= foodnames,itemPrices=itemPrices,formsInput=formsInput, doge=doge,total = subtotals,sumitem = sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
     elif placebutton.submit.data:
         return checkout()
 
-    return render_template("menu.html", formlist=formlist, databaseitems=FoodItem.query.all(), doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
+    return render_template("menu.html",  databaseitems=menus, doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
 @app.route('/checkout')
-@login_required
+@login_required('CUSTOMER')
 def checkout():
     # Get the value stored in the session['ProductTotal'] and store it in cartTotal
     # If there is no item on the cart, return a message for them to return to menu
@@ -130,8 +194,22 @@ def login():
                 flash('Incorrect password or email')
     return render_template("login.html", form=form)
 
+@app.route('/loginEmployee', methods=['GET', 'POST'])
+def login_employee():
+    loginForm = loginEmployee()
+    if loginForm.validate_on_submit():
+        employee = Employee.query.filter_by(username=loginForm.employee.data).first()
+        if employee:
+            if employee.password == loginForm.password.data:
+                login_user(employee)
+                print("EMPLY LOGGED IN")
+                return redirect(url_for('home'))
+            else:
+                flash('Incorrect password or email')
+    return render_template("loginEmployee.html",loginForm=loginForm)
+
 @app.route('/logout')
-@login_required
+@login_required()
 def logout():
     logout_user()
     return redirect(url_for('home'))
@@ -139,7 +217,7 @@ def logout():
 @app.route('/checkUser')
 def checkUser():
     if current_user.is_authenticated:
-        return '<h1> You are logged in, %s %s </h1>' % (current_user.firstName, current_user.lastName)
+        return '<h1> You are logged in, %s %s </h1>' % (current_user.firstName, current_user.lastName,current_user.get_user_type())
     else:
         return '<h1> You are logged out </h1>'
 
@@ -148,12 +226,74 @@ def contact():
     return render_template("contact.html")
 
 @app.route('/profile')
-@login_required
+@login_required('CUSTOMER')
 def user_profile():
     return render_template("profile.html", user = current_user)
 
+@app.route('/managerPage',methods=['GET', 'POST'])
+@login_required('MANAGER')
+def manager_page():
+    return render_template("managerPage.html")
+
+@app.route('/chefPage',methods=['GET', 'POST'])
+@login_required('CHEF')
+def chef_Page():
+
+    addToTheMenu = addToMenu(prefix="Add")
+    removeFromMenu = deleteFromMenu(prefix="Delete")
+
+    #We need to know which chef is cureently logged in to determine the menu or menus that he/she posseses
+    listOfMenuItems = get_all_food_items_by_chef(current_user.id)
+
+    menuForChef = get_all_menus_by_chef(current_user.id)
+    menuID = int(menuForChef[0].menuID)
+
+    if addToTheMenu.submit.data:
+
+        newItem = addToTheMenu.droplist.data
+
+        print(menuForChef) #Prints the chef menus in a list
+        print(newItem)#prints Food Item ID
+        print(menuForChef[0].menuID,"::::MENU ID FOR CHEF")
+
+        #Get size of current MenuItems table
+        nextMenuID = get_table_size(MenuItem)
+        print("BEFORE ",nextMenuID)
+
+        if not is_food_item_exist(menuID,newItem):
+            new_menu_item = MenuItem(menuItemID = nextMenuID,
+                                    menuID = menuID,
+                                    itemID = newItem ,
+                                    menuItemRating= 5)
+            db.session.add(new_menu_item)
+            db.session.commit()
+
+        print("AFTER:",get_table_size(MenuItem))
+
+        #listOfMenuItems = get_all_food_items_by_menu(1)  # Fixed to menu1
+        listOfMenuItems = get_all_food_items_by_chef(current_user.id)
+
+        return render_template("chefPage.html", add=addToTheMenu,delete = removeFromMenu,  menu=listOfMenuItems)
+
+    elif removeFromMenu.submit.data:
+
+        print("BEFORE DELETE:", get_table_size(MenuItem))
+
+        MenuItem.query.filter_by(itemID=removeFromMenu.droplist.data,menuID=menuID).delete() #Make only one be removed
+        db.session.commit()
+        listOfMenuItems = get_all_food_items_by_chef(current_user.id)
+        print("AFTER DELETE:", get_table_size(MenuItem))
+        return render_template("chefPage.html", add=addToTheMenu,delete = removeFromMenu, menu=listOfMenuItems)
+
+    return render_template("chefPage.html" ,add = addToTheMenu,delete = removeFromMenu, menu = listOfMenuItems)
+
+@app.route('/deliverPage',methods=['GET', 'POST'])
+@login_required('DELIVERY')
+def deliver_Page():
+    return render_template("deliverPage.html")
+
 @app.route('/addmoney', methods=['GET', 'POST'])
-@login_required
+@login_required('CUSTOMER')
 def addmoney():
     form = accountsetting()
     if form.validate_on_submit():
@@ -161,3 +301,8 @@ def addmoney():
         db.session.commit()
         return render_template("addmoney.html",form = form, user = current_user)
     return render_template("addmoney.html",form = form, user = current_user)
+
+@app.route('/argh', methods=['GET'])
+@login_required('CUSTOMER')
+def argh():
+    return "You are either not logged in as a customer or not logged in at all"
