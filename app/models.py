@@ -18,16 +18,17 @@ class Customer(UserMixin, db.Model):
     email = db.Column(db.String(30), unique=True)
     contactNum = db.Column(db.Integer)
     acctBal = db.Column(db.REAL)
-    numWarning = db.Column(db.Integer)
-    statusVIP = db.Column(db.Boolean)
+    numWarning = db.Column(db.Integer, default=0)
+    statusVIP = db.Column(db.Boolean, default=False)
     activated = db.Column(db.Boolean, default=False)
     password = db.Column(db.Text)
 
     def __repr__(self):
-        return '<customerID: %s, username: %s}>' % (self.id, self.username)
+        return '<customerID: %s, username: %s>' % (self.id, self.username)
 
     def get_user_type(self):
-        return "CUSTOMER"
+        return 'CUSTOMER'
+
 
 class PaymentInfo(db.Model):
     __tablename__ = 'payment_infos'
@@ -57,6 +58,7 @@ class Menu(db.Model):
 
 # A relationship between menus and food items. States which food items
 # are available in which menus.
+
 class MenuItem(db.Model):
     __tablename__ = 'menu_items'
     menuItemID = db.Column(db.Integer, primary_key=True)
@@ -70,13 +72,11 @@ class MenuItem(db.Model):
     menuRel = db.relationship('Menu', backref='menuItemRel')
     foodItemRel = db.relationship('FoodItem', backref='menuItemRel')
 
-
     def __repr__(self):
         return '<menuID: %s, itemID: %s>' % (self.menuID, self.itemID)
 
 
-# A table of different food items. Has the basic characteristics of
-# food.
+# A table of different food items. Has the basic characteristics of food
 class FoodItem(db.Model):
     __tablename__ = 'food_items'
     itemID = db.Column(db.Integer, primary_key=True)
@@ -133,26 +133,31 @@ class Employee(UserMixin, db.Model):
     lastName = db.Column(db.String(30))
     firstName = db.Column(db.String(30))
     emplType = db.Column(db.Integer, db.ForeignKey('employee_types.typeID'))
-    numComplaint = db.Column(db.Integer)
-    payGrade = db.Column(db.REAL)
-    password = db.Column(db.Text)
+    numComplaint = db.Column(db.Integer, default=0)
+    numDemotion = db.Column(db.Integer, default=0)
+    payGrade = db.Column(db.Integer, db.ForeignKey('salary_bases.salaryID'))
     activated = db.Column(db.Boolean, default=True)
+    password = db.Column(db.Text)
 
     __table_args__ = (db.CheckConstraint(sqltext='numComplaint BETWEEN 0 and 3',
-                                         name='complaint_range'),)
+                                         name='complaint_range'),
+                      db.CheckConstraint(sqltext='numDemotion BETWEEN 0 and 2',
+                                         name='demotion_range'),)
 
     emplTypeRel = db.relationship('EmployeeType', backref='employeeRel')
+    salaryBaseRel = db.relationship('SalaryBase', backref='employeeRel')
 
     def __repr__(self):
-        return '<emplid: %s, username: %s, emplType: %s>' % (self.id, self.username, self.emplType)
+        return '<emplID: %s, username: %s, emplType: %s>' % (self.id, self.username, self.emplType)
 
     def get_user_type(self):
         if self.emplType == 0:
-            return "MANAGER"
+            return 'MANAGER'
         elif self.emplType == 1:
-            return "CHEF"
+            return 'CHEF'
         else:
-            return "DELIVERY"
+            return 'DELIVERY'
+
 
 class EmployeeType(db.Model):
     __tablename__ = 'employee_types'
@@ -176,7 +181,7 @@ class Complaint(db.Model):
     __tablename__ = 'complaints'
     complaintID = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), db.ForeignKey('customers.username'))
-    chefID = db.Column(db.Integer, db.ForeignKey('employees.id'))
+    emplID = db.Column(db.Integer, db.ForeignKey('employees.id'))
     orderID = db.Column(db.Integer, db.ForeignKey('orders.orderID'))
     comment = db.Column(db.Text)
     isGood = db.Column(db.Boolean)
@@ -295,7 +300,7 @@ def make_complaint(orderID, emplID, username, comments, isGood):
 # calculate the average rating of food item
 # associated with a menu from all the records
 # in the `order_details` table
-def get_cumulative_food_item_rating(itemID, menuID):
+def get_cumulative_food_item_rating(menuID, itemID):
     stmt = db.session.query(func.avg(OrderDetail.itemRating))\
         .filter(OrderDetail.itemID == itemID, OrderDetail.menuID == menuID)\
         .scalar()
@@ -322,33 +327,56 @@ def check_delivered(orderID):
 
 # MANAGER-RELATED QUERIES
 
-# accept the complaint that has been posted
-# by a customer and increment the number of complaint
-# for the corresponding employee
-def accept_complaint(complaintID):
-    stmt = Complaint.query.filter(Complaint.complaintID == complaintID)
-    stmt.isAccepted = True
-    db.session.add(stmt)
-    db.session.commit()
-
-
-# decline the complaint that has been posted by a customer
-# and increment the number of warning to that customer by one
-def decline_complaint(complaintID):
-    stmt = Complaint.query.filter(Complaint.complaintID == complaintID).first()
-    stmt.isAccepted = False
-    stmt2 = Customer.query.filter(Customer.username == stmt.username)
-    stmt2.numWarning += 1
-    db.session.add(stmt, stmt2)
-    db.session.commit()
+# returns all new customers request
+# for accounts
+def get_all_new_customers():
+    return Customer.query.filter(Customer.activated == False).all()
 
 
 # deactivate a customer account
-def deactivate_account(username):
+def deactivate_customer_account(username):
     stmt = Customer.query.filter(Customer.username == username).first()
     stmt.activated = False
     db.session.add(stmt)
     db.session.commit()
+
+
+# activate a customer account
+def activate_customer_account(username):
+    stmt = Customer.query.filter(Customer.username == username).first()
+    stmt.activated = True
+    db.session.add(stmt)
+    db.session.commit()
+
+
+# promote a customer to VIP Status
+def promote_to_VIP(username):
+    stmt = Customer.query.filter(Customer.username == username).first()
+    stmt.statusVIP = True
+    db.session.add(stmt)
+    db.session.commit()
+
+
+# demote a customer from VIP Status
+def demote_from_VIP(username):
+    stmt = Customer.query.filter(Customer.username == username).first()
+    stmt.statusVIP = False
+    db.session.add(stmt)
+    db.session.commit()
+
+
+# returns the total amount of money
+# that has been spent by a customer
+def total_money_spent(username):
+    stmt = db.session.query(func.sum(Order.totalPrice)) \
+        .filter(Order.username == username) \
+        .scalar()
+    return round(stmt)
+
+
+# return all employees in the database
+def get_all_employees():
+    return Employee.query.all()
 
 
 # increase the pay grade of the employee
@@ -359,18 +387,58 @@ def promote_employee(emplID):
     db.session.commit()
 
 
-# decrease the pay grade of the employee
+# decrease the pay grade of the employee and
+# increment the numDemotion field by one
 def demote_employee(emplID):
     stmt = Employee.query.filter(Employee.id == emplID).first()
-    stmt.payGrade -= 1
+    if stmt.numDemotion in range(0, 2):
+        stmt.payGrade -= 1
+        stmt.numDemotion += 1
     db.session.add(stmt)
     db.session.commit()
 
 
-# deactivate the employee account;
-# effectively firing them
+# deactivate the employee account, effectively firing them
 def fire_employee(emplID):
     stmt = Employee.query.filter(Employee.id == emplID).first()
     stmt.activated = False
     db.session.add(stmt)
+    db.session.commit()
+
+
+# returns all complaints that has not been processed
+# (i.e. `accepted` field is Null/None)
+def get_all_complaints():
+    return Complaint.query.filter(Complaint.accepted == None).all()
+
+
+# accept the complaint or compliment that has been posted
+# by a customer and increment or decrement the number of complaint
+# for the corresponding employee by one, respectively
+def accept_complaint(complaintID):
+    complaint_stmt = Complaint.query.filter(Complaint.complaintID == complaintID).first()
+    empl = Employee.query.filter(Employee.id == complaint_stmt.emplID).first()
+    complaint_stmt.accepted = True
+    if complaint_stmt.isGood:
+        if empl.numComplaint in range(0, 3):
+            empl.numComplaint -= 1
+    else:
+        if empl.numComplaint in range(0, 3):
+            empl.numComplaint += 1
+    db.session.add_all([complaint_stmt, empl])
+    db.session.commit()
+
+
+# decline the complaint that has been posted by a customer
+# and increment the number of warning to that customer by one
+def decline_complaint(complaintID):
+    complaint_stmt = Complaint.query.filter(Complaint.complaintID == complaintID).first()
+    cust = Customer.query.filter(Customer.username == complaint_stmt.username).first()
+    complaint_stmt.accepted = False
+    if complaint_stmt.isGood:
+        db.session.add(complaint_stmt)
+    else:
+        if cust.numWarning in range(0, 3):
+            cust.numWarning += 1
+            db.session.add_all([complaint_stmt, cust])
     db.session.commit()

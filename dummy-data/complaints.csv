@@ -1,0 +1,3 @@
+complaintID, username, emplID, orderID, comment, isGood
+1, ichwan, 1008, 3, "the d-boy is being a jerk. Not only he took so long, but he gave me the face", 0
+2, smei1, 1007, 1, "The delivery boy is very courteous. Amazing!!!", 1

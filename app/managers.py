@@ -35,7 +35,8 @@ def rebuild_database():
         {'model': MenuItem, 'file': 'menuItems.csv'},
         {'model': Customer, 'file': 'customers.csv'},
         {'model': Order, 'file': 'orders.csv'},
-        {'model': OrderDetail, 'file': 'orderDetails.csv'}
+        {'model': OrderDetail, 'file': 'orderDetails.csv'},
+        {'model': Complaint, 'file': 'complaints.csv'}
     ]
     for thing in dummy_files:
         filename = path.join(basedir, datadir, thing['file'])
