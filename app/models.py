@@ -287,7 +287,7 @@ def comment_food_item_ordered(orderID, itemID, comment):
 def make_complaint(orderID, emplID, username, comments, isGood):
     stmt = Complaint()
     stmt.orderID = orderID
-    stmt.chefID = emplID
+    stmt.emplID = emplID
     stmt.username = username
     stmt.comment = comments
     stmt.isGood = isGood
