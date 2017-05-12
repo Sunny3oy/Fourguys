@@ -376,3 +376,19 @@ def demote_employee(emplID):
 
 def fire_employee(emplID):
     pass
+
+def get_employee_types():
+     emplTypes = EmployeeType.query.all()
+     return emplTypes
+
+def get_salaries():
+    salaries = SalaryBase.query.all()
+    return salaries
+
+def get_employees():
+    employees = Employee.query.all()
+    return  employees
+
+def get_customers():
+    customers = Customer.query.all()
+    return  customers

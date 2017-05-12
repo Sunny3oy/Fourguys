@@ -233,7 +233,95 @@ def user_profile():
 @app.route('/managerPage',methods=['GET', 'POST'])
 @login_required('MANAGER')
 def manager_page():
-    return render_template("managerPage.html")
+
+    managerForm = managerButtons(prefix="Manager Buttons") #Creates buttons for manager functionalities
+
+    #***THE FOLLOWING IS TO GET THE DYNAMIC DROPLISTS FOR EMPLYEES AND CUSTOMERS***#
+    ###Getting employee drop list###
+    employeeList = []
+    employees = get_employees()
+    for employee in employees:
+        if not employee.emplType == 0:  # Managers (type 0) are not subject to promotions or demotions
+            if employee.emplType == 1:
+                employeeType = "Chef: "
+            else:
+                employeeType = "Delv: "
+            employeeList.append((employee.id, employeeType + employee.firstName + ' ' + employee.lastName))
+    managerForm.employeeDropList.choices = employeeList
+    ###Getting customers drop list###
+    customersList = []
+    customers = get_customers()
+    for customer in customers:
+        # Do not forget to put a condition here that checks whether they are MVP or NOT
+        customersList.append((customer.id, customer.firstName + ' ' + customer.lastName))
+    managerForm.customerDropList.choices = customersList
+    ################################
+
+    if managerForm.hire.data:
+        return redirect(url_for('hire'))
+    elif managerForm.fire.data:
+        return 1
+    elif managerForm.promoteE.data:
+        return 1
+    elif managerForm.demoteE.data:
+        return 1
+    elif managerForm.promoteE.data:
+        return 1
+    elif managerForm.demoteE.data:
+        return 1
+
+    return render_template("managerPage.html",managerForm=managerForm)
+
+@app.route('/hire',methods=['GET', 'POST'])
+@login_required('MANAGER')
+def hire():
+    hireform = hireEmployee()
+
+    #When chefs are created they also need an empty default menu
+
+    if hireform.submit.data:
+        if hireform.password.data != hireform.conpassword.data:
+            flash('Passwords must match dumb manager!')
+        else:
+            new_employee = Employee(username = hireform.username.data,
+                                    firstName = hireform.firstname.data,
+                                    lastName = hireform.lastname.data,
+                                    emplType= int(hireform.typeDropList.data),
+                                    numComplaint = 0,
+                                    payGrade = int(hireform.salaryDropList.data),
+                                    password = hireform.password.data)
+            db.session.add(new_employee)
+            db.session.commit()
+            print("Type plus sal:" + hireform.typeDropList.data + ' ' + hireform.salaryDropList.data)
+
+            #Create menu if it is a chef
+            if int(hireform.typeDropList.data) == 1: #Create empty menu for chef
+                new_menu = Menu(chefID = new_employee.id,
+                                menuName = "To Name",
+                                menuDesc = "To Write Description")
+                db.session.add(new_menu)
+                db.session.commit()
+                print("MENU CREATED!")
+            return redirect(url_for('manager_page'))
+
+
+
+    # form = signup()
+    # if form.validate_on_submit():
+    #     if form.password.data != form.conpassword.data:
+    #         flash('Password mush match!')
+    #     else:
+    #         new_user = Customer(username=form.username.data,
+    #                             firstName=form.firstname.data,
+    #                             lastName=form.lastname.data,
+    #                             email=form.email.data,
+    #                             password=form.password.data,
+    #                             address=form.address.data)
+    #         db.session.add(new_user)
+    #         db.session.commit()
+    #         return redirect(url_for('login'))
+
+    return render_template("hire.html",hireForm=hireform)
 
 @app.route('/chefPage',methods=['GET', 'POST'])
 @login_required('CHEF')

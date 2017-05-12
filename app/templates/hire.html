@@ -105,16 +105,11 @@
       <p><a href="#">Manager</a></p>
       <p><a href="#">Complains or Compliments</a></p>
       <p><a href="#">Accept of Reject Button for Each</a></p>
-      <form method="post" action="/managerPage">
-      {{ managerForm.hidden_tag() }}
-      {{ wtf.form_field(managerForm.hire) }}
-      {{ wtf.form_field(managerForm.warning) }}
-      </form>
     </div>
-    <div class="col-sm-8 text-left" style="width: 752px">
+    <div class="col-sm-8 text-left">
       <h1>Welcome</h1>
 
-       <form method="post" action="/managerPage">
+       <form method="post" action="/hire">
 {#       {% for item in menu %}#}
 {#           <p>{{ item.itemName }}</p>#}
 {#       {% endfor %}#}
@@ -122,30 +117,25 @@
        </form>
 {#      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>#}
       <hr>
-      <h3>Test</h3>
-      <form method="post" action="/managerPage">
-
+      <h3>Hire Employee</h3>
+      <form method="post" action="/hire">
+      {{ hireForm.hidden_tag() }}
+      {{ wtf.form_field(hireForm.username) }}
+      {{ wtf.form_field(hireForm.firstname) }}
+      {{ wtf.form_field(hireForm.lastname) }}
+      {{ wtf.form_field(hireForm.typeDropList) }}
+      {{ wtf.form_field(hireForm.salaryDropList) }}
+      {{ wtf.form_field(hireForm.password) }}
+      {{ wtf.form_field(hireForm.conpassword) }}
+      {{ wtf.form_field(hireForm.submit) }}
       </form>
     </div>
 
 
 
+
 {##############################}
-  <div class="col-sm-2 sidenav" style="width: 300px" >
 
-    <form method="post" action="/managerPage" >
-      {{ managerForm.hidden_tag() }}
-      {{ wtf.form_field(managerForm.employeeDropList) }}
-      {{ wtf.form_field(managerForm.promoteE) }}
-      {{ wtf.form_field(managerForm.demoteE) }}
-      {{ wtf.form_field(managerForm.fire) }}
-
-      {{ wtf.form_field(managerForm.customerDropList) }}
-      {{ wtf.form_field(managerForm.promoteC) }}
-      {{ wtf.form_field(managerForm.demoteC) }}
-      {{ wtf.form_field(managerForm.close) }}
-    </form>
-    </div>
 
 {##############################}
 
@@ -153,4 +143,10 @@
 </div>
 
 
+
+
+    <form method="post" action="/hire">
+    </form>
+    <form method="post" action="/hire">
+    </form>
 {% endblock %}

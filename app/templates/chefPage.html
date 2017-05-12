@@ -125,17 +125,7 @@
 
 {##############################}
     <div class="col-sm-2 sidenav">
-{#        <form method="post" action="/Home1">#}
-{##}
-{#        {% for items in topFoods %}#}
-{#        <p style="font-size: 20px"><strong>{{ items.itemName }}</strong></p>#}
-{#        <p>Price: ${{ items.itemPrice }}</p>#}
-{##}
-{#        <a href="menu">#}
-{#        <img src="static/{{ items.itemPict }}" height="100" width="185" style="user-select: none">#}
-{#        </a>#}
-{#        {% endfor %}#}
-{#        </form>#}
+
     <form method="post" action="/chefPage">
       {{ add.hidden_tag() }}
       {{ wtf.form_field(add.droplist) }}
