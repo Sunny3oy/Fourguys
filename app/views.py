@@ -74,6 +74,18 @@ def home():
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
+    check = current_user.is_authenticated
+    # typeofUser=""
+    if check:
+        typeofUser = current_user.get_user_type()
+        if typeofUser == "CUSTOMER":
+            numberType = 0
+        elif typeofUser == "MANAGER":
+            numberType = 1
+        elif typeofUser == "CHEF":
+            numberType = 2
+        else:
+            numberType = 3  # Deliver
     doge = 0                  #0 if no shopping cart, 1 otherwise
     sumitem = 0               #Saves total sum of food items
     numbers = [0, 1, 2, 3, 4] #Used to render 'rating hearts'
@@ -145,12 +157,12 @@ def menu():
         # the customer is not charged more than once
         session['orderMade'] = False
 
-        return render_template("menu.html",databaseitems=menus,foodnames= foodnames,itemPrices=itemPrices,formsInput=formsInput, doge=doge,total = subtotals,sumitem = sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
+        return render_template("menu.html",check = check,numberType=numberType,databaseitems=menus,foodnames= foodnames,itemPrices=itemPrices,formsInput=formsInput, doge=doge,total = subtotals,sumitem = sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
     elif placebutton.submit.data:
         return checkout()
 
-    return render_template("menu.html",  databaseitems=menus, doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
+    return render_template("menu.html",check = check,numberType=numberType,databaseitems=menus, doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
 @app.route('/checkout')
 @login_required('CUSTOMER')
@@ -233,7 +245,22 @@ def user_profile():
 @app.route('/managerPage',methods=['GET', 'POST'])
 @login_required('MANAGER')
 def manager_page():
-    return render_template("managerPage.html")
+    managerForm = managerButtons(prefix="Manager Buttons") #Creates buttons for manager functionalities
+
+    if managerForm.hire.data:
+        return 1
+    elif managerForm.fire.data:
+        return 1
+    elif managerForm.promoteE.data:
+        return 1
+    elif managerForm.demoteE.data:
+        return 1
+    elif managerForm.promoteE.data:
+        return 1
+    elif managerForm.demoteE.data:
+        return 1
+
+    return render_template("managerPage.html",managerForm=managerForm)
 
 @app.route('/chefPage',methods=['GET', 'POST'])
 @login_required('CHEF')
@@ -301,6 +328,16 @@ def addmoney():
         db.session.commit()
         return render_template("addmoney.html",form = form, user = current_user)
     return render_template("addmoney.html",form = form, user = current_user)
+
+@app.route('/changeadd', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def changeadd():
+    form = changeaddress()
+    if form.validate_on_submit():
+        current_user.address = form.changeCurAdd.data
+        db.session.commit()
+        return render_template("changeadd.html",form = form, user = current_user)
+    return render_template("changeadd.html",form = form, user = current_user)
 
 @app.route('/argh', methods=['GET'])
 @login_required('CUSTOMER')

@@ -42,8 +42,25 @@
        <li><a href="/">Home</a></li>
        <li><a href="menu">Menu</a></li>
        <li><a href="contact">Contact Us</a></li>
-       <li><a href="signup">Sign up</a></li>
-       <li><a href="login">Log in</a></li>
+        {% if check %}
+            {% if numberType == 0 %}
+                <li><a href="profile">Customer</a></li>
+
+            {% elif numberType == 1 %}
+                <li><a href="managerPage">Manager</a></li>
+
+            {% elif numberType == 2 %}
+                <li><a href="chefPage">Chef</a></li>
+
+            {% elif numberType == 3 %}
+                <li><a href="deliveryPage">Delivery</a></li>
+            {% endif %}
+
+            <li><a href="logout">Log Out</a></li>
+        {% else %}
+            <li><a href="signup">Sign up</a></li>
+            <li><a href="login">Log in</a></li>
+        {% endif %}
     </ul>
 
 
