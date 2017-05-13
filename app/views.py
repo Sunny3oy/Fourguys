@@ -1,13 +1,32 @@
+from functools import wraps
+
 from .forms import *
 from .models import *
-from flask import render_template, flash, url_for, redirect, session
+from flask import render_template, flash, url_for, redirect, session, current_app
 from flask_login import *
+
+
+# override the built-in login_required() function
+def login_required(role='ANY'):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return current_app.login_manager.unauthorized()
+            user_role = current_user.get_user_type()
+            if (user_role != role) and (role != 'ANY'):
+                return current_app.login_manager.unauthorized()
+            return f(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
 
 @app.login_manager.user_loader
 def load_user(user_id):
     return Customer.query.get(int(user_id))
 
-@app.route('/signup',methods=['GET', 'POST'])
+
+@app.route('/signup', methods=['GET', 'POST'])
 def signup1():
     form = signup()
     if form.validate_on_submit():
@@ -25,6 +44,7 @@ def signup1():
             return redirect(url_for('login'))
     return render_template("Signup.html", form=form)
 
+
 @app.route('/',methods=['GET', 'POST'])
 def home():
     check = current_user.is_authenticated
@@ -32,6 +52,7 @@ def home():
         return render_template("home.html",user = current_user.firstName,check = check)
     else:
         return render_template("home.html", user = "Guest", check = check)
+
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
@@ -89,7 +110,7 @@ def menu():
     return render_template("menu.html", formlist=formlist, databaseitems=FoodItem.query.all(), doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
 @app.route('/checkout')
-@login_required
+@login_required('CUSTOMER')
 def checkout():
     # Get the value stored in the session['ProductTotal'] and store it in cartTotal
     # If there is no item on the cart, return a message for them to return to menu
@@ -117,6 +138,7 @@ def checkout():
                 session['orderMade'] = True
     return render_template("checkout.html", total=cartTotal, newbalance=current_user.acctBal, message=message, diffmessg=diffmessg)
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = login1()
@@ -130,30 +152,35 @@ def login():
                 flash('Incorrect password or email')
     return render_template("login.html", form=form)
 
+
 @app.route('/logout')
-@login_required
+@login_required()
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
 @app.route('/checkUser')
 def checkUser():
     if current_user.is_authenticated:
-        return '<h1> You are logged in, %s %s </h1>' % (current_user.firstName, current_user.lastName)
+        return '<h1> You are logged in, %s %s, as %s</h1>' % (current_user.firstName, current_user.lastName, current_user.get_user_type())
     else:
         return '<h1> You are logged out </h1>'
+
 
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
 
+
 @app.route('/profile')
-@login_required
+@login_required('CUSTOMER')
 def user_profile():
     return render_template("profile.html", user = current_user)
 
+
 @app.route('/addmoney', methods=['GET', 'POST'])
-@login_required
+@login_required('CUSTOMER')
 def addmoney():
     form = accountsetting()
     if form.validate_on_submit():
@@ -161,3 +188,9 @@ def addmoney():
         db.session.commit()
         return render_template("addmoney.html",form = form, user = current_user)
     return render_template("addmoney.html",form = form, user = current_user)
+
+
+@app.route('/argh', methods=['GET'])
+@login_required('CUSTOMER')
+def argh():
+    return "You are either not logged in as a customer or not logged in at all"
