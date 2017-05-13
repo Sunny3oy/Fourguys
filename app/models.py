@@ -1,3 +1,4 @@
+import faketime
 from app import app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -95,6 +96,7 @@ class Order(db.Model):
     orderID = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), db.ForeignKey('customers.username'))
     delivererID = db.Column(db.Integer, db.ForeignKey('employees.id'))
+    orderDate = db.Column(db.DateTime, default=faketime.FakeTime.get_now())
     totalPrice = db.Column(db.REAL)
     isDelivered = db.Column(db.Boolean)
 
@@ -404,6 +406,27 @@ def fire_employee(emplID):
     stmt.activated = False
     db.session.add(stmt)
     db.session.commit()
+
+
+# calculate the average rating for all
+# food items cooked by a chef
+def get_total_rating(chefID):
+    stmt = db.session.query(func.avg(OrderDetail.itemRating)) \
+        .join(Menu, OrderDetail.menuID == Menu.menuID) \
+        .filter(Menu.chefID == chefID) \
+        .scalar()
+    return None if stmt is None else round(stmt)
+
+
+# returns the number of days since the chef
+# receive their latest order
+def get_days_since_last_order(chefID):
+    stmt = db.session.query(func.max(Order.orderDate))\
+        .join(OrderDetail, Order.orderID == OrderDetail.orderID)\
+        .join(Menu, OrderDetail.menuID == Menu.menuID)\
+        .filter(Menu.chefID == chefID)\
+        .scalar()
+    return None if stmt is None else (faketime.FakeTime.get_now() - stmt).days
 
 
 # returns all complaints that has not been processed
