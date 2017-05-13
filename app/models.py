@@ -360,19 +360,4 @@ def is_food_item_exist(menuID, itemID):
 def get_table_size(table):
 
     table_elements = table.query.count()
-    return  table_elements
-
-def increment_customer_warning(username):
-    pass
-
-
-def promote_employee(emplID):
-    pass
-
-
-def demote_employee(emplID):
-    pass
-
-
-def fire_employee(emplID):
-    pass
+    return table_elements

@@ -229,7 +229,7 @@ def logout():
 @app.route('/checkUser')
 def checkUser():
     if current_user.is_authenticated:
-        return '<h1> You are logged in, %s %s </h1>' % (current_user.firstName, current_user.lastName,current_user.get_user_type())
+        return '<h1> You are logged in, %s %s as %s </h1>' % (current_user.firstName, current_user.lastName,current_user.get_user_type())
     else:
         return '<h1> You are logged out </h1>'
 
