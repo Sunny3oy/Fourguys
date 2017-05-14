@@ -18,6 +18,11 @@ class accountsetting(FlaskForm):
 class changeaddress(FlaskForm):
     changeCurAdd = StringField('Address', validators=[InputRequired()])
 
+class changepass(FlaskForm):
+    oldpassword = PasswordField('Old Password', validators=[InputRequired(), Length(min=8, max=80)])
+    changeuserpass = PasswordField('New Password', validators=[InputRequired(), Length(min=8, max=80)])
+    confirm = PasswordField('Confirm New Password', validators=[InputRequired(), Length(min=8, max=80), ])
+
 class login1(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(max=50)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])

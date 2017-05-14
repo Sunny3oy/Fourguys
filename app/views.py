@@ -426,6 +426,18 @@ def changeadd():
         return render_template("changeadd.html",form = form, user = current_user)
     return render_template("changeadd.html",form = form, user = current_user)
 
+@app.route('/changepassword', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def changepassword():
+    form = changepass()
+    check = 0
+    if form.validate_on_submit():
+            if (current_user.password == form.oldpassword.data) and form.changeuserpass.data == form.confirm.data :
+                current_user.password = form.confirm.data
+                db.session.commit()
+                check = 1
+                return render_template("changepassword.html",form = form, user = current_user,check=check)
+    return render_template("changepassword.html",form = form, user = current_user,check = check)
 
 @app.route('/argh', methods=['GET'])
 @login_required('CUSTOMER')
