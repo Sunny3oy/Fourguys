@@ -26,6 +26,7 @@ def login_required(role='ANY'):
 #     print(user_id)
 #     return Customer.query.get(int(user_id))
 
+
 @app.login_manager.user_loader
 def load_user(user_id):
     print(user_id)
@@ -34,7 +35,8 @@ def load_user(user_id):
     else:
         return Customer.query.get(int(user_id))
 
-@app.route('/signup',methods=['GET', 'POST'])
+
+@app.route('/signup', methods=['GET', 'POST'])
 def signup1():
     form = signup()
     if form.validate_on_submit():
@@ -51,6 +53,7 @@ def signup1():
             db.session.commit()
             return redirect(url_for('login'))
     return render_template("Signup.html", form=form)
+
 
 @app.route('/',methods=['GET', 'POST'])
 def home():
@@ -72,8 +75,21 @@ def home():
     else:
         return render_template("home.html", user = "Guest", check = check)
 
+
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
+    check = current_user.is_authenticated
+    # typeofUser=""
+    if check:
+        typeofUser = current_user.get_user_type()
+        if typeofUser == "CUSTOMER":
+            numberType = 0
+        elif typeofUser == "MANAGER":
+            numberType = 1
+        elif typeofUser == "CHEF":
+            numberType = 2
+        else:
+            numberType = 3  # Deliver
     doge = 0                  #0 if no shopping cart, 1 otherwise
     sumitem = 0               #Saves total sum of food items
     numbers = [0, 1, 2, 3, 4] #Used to render 'rating hearts'
@@ -145,12 +161,12 @@ def menu():
         # the customer is not charged more than once
         session['orderMade'] = False
 
-        return render_template("menu.html",databaseitems=menus,foodnames= foodnames,itemPrices=itemPrices,formsInput=formsInput, doge=doge,total = subtotals,sumitem = sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
+        return render_template("menu.html",check = check,numberType=numberType,databaseitems=menus,foodnames= foodnames,itemPrices=itemPrices,formsInput=formsInput, doge=doge,total = subtotals,sumitem = sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
     elif placebutton.submit.data:
         return checkout()
 
-    return render_template("menu.html",  databaseitems=menus, doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
+    return render_template("menu.html",check = check,numberType=numberType,databaseitems=menus, doge=doge, sumitem=sumitem,shopbutton=shopbutton, placebutton=placebutton,numbers=numbers)
 
 @app.route('/checkout')
 @login_required('CUSTOMER')
@@ -181,6 +197,7 @@ def checkout():
                 session['orderMade'] = True
     return render_template("checkout.html", total=cartTotal, newbalance=current_user.acctBal, message=message, diffmessg=diffmessg)
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = login1()
@@ -193,6 +210,7 @@ def login():
             else:
                 flash('Incorrect password or email')
     return render_template("login.html", form=form)
+
 
 @app.route('/loginEmployee', methods=['GET', 'POST'])
 def login_employee():
@@ -208,32 +226,36 @@ def login_employee():
                 flash('Incorrect password or email')
     return render_template("loginEmployee.html",loginForm=loginForm)
 
+
 @app.route('/logout')
 @login_required()
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
 @app.route('/checkUser')
 def checkUser():
     if current_user.is_authenticated:
-        return '<h1> You are logged in, %s %s </h1>' % (current_user.firstName, current_user.lastName,current_user.get_user_type())
+        return '<h1> You are logged in, %s %s as %s </h1>' % (current_user.firstName, current_user.lastName,current_user.get_user_type())
     else:
         return '<h1> You are logged out </h1>'
+
 
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
+
 
 @app.route('/profile')
 @login_required('CUSTOMER')
 def user_profile():
     return render_template("profile.html", user = current_user)
 
+  
 @app.route('/managerPage',methods=['GET', 'POST'])
 @login_required('MANAGER')
 def manager_page():
-
     managerForm = managerButtons(prefix="Manager Buttons") #Creates buttons for manager functionalities
 
     #***THE FOLLOWING IS TO GET THE DYNAMIC DROPLISTS FOR EMPLYEES AND CUSTOMERS***#
@@ -271,6 +293,7 @@ def manager_page():
         return 1
 
     return render_template("managerPage.html",managerForm=managerForm)
+
 
 @app.route('/hire',methods=['GET', 'POST'])
 @login_required('MANAGER')
@@ -323,6 +346,7 @@ def hire():
 
     return render_template("hire.html",hireForm=hireform)
 
+  
 @app.route('/chefPage',methods=['GET', 'POST'])
 @login_required('CHEF')
 def chef_Page():
@@ -380,6 +404,7 @@ def chef_Page():
 def deliver_Page():
     return render_template("deliverPage.html")
 
+  
 @app.route('/addmoney', methods=['GET', 'POST'])
 @login_required('CUSTOMER')
 def addmoney():
@@ -389,6 +414,18 @@ def addmoney():
         db.session.commit()
         return render_template("addmoney.html",form = form, user = current_user)
     return render_template("addmoney.html",form = form, user = current_user)
+
+
+@app.route('/changeadd', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def changeadd():
+    form = changeaddress()
+    if form.validate_on_submit():
+        current_user.address = form.changeCurAdd.data
+        db.session.commit()
+        return render_template("changeadd.html",form = form, user = current_user)
+    return render_template("changeadd.html",form = form, user = current_user)
+
 
 @app.route('/argh', methods=['GET'])
 @login_required('CUSTOMER')
