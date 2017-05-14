@@ -26,6 +26,7 @@ def login_required(role='ANY'):
 #     print(user_id)
 #     return Customer.query.get(int(user_id))
 
+
 @app.login_manager.user_loader
 def load_user(user_id):
     print(user_id)
@@ -34,7 +35,8 @@ def load_user(user_id):
     else:
         return Customer.query.get(int(user_id))
 
-@app.route('/signup',methods=['GET', 'POST'])
+
+@app.route('/signup', methods=['GET', 'POST'])
 def signup1():
     form = signup()
     if form.validate_on_submit():
@@ -51,6 +53,7 @@ def signup1():
             db.session.commit()
             return redirect(url_for('login'))
     return render_template("Signup.html", form=form)
+
 
 @app.route('/',methods=['GET', 'POST'])
 def home():
@@ -71,6 +74,7 @@ def home():
         return render_template("home.html",user = current_user.firstName,check = check,numberType=numberType)
     else:
         return render_template("home.html", user = "Guest", check = check)
+
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
@@ -193,6 +197,7 @@ def checkout():
                 session['orderMade'] = True
     return render_template("checkout.html", total=cartTotal, newbalance=current_user.acctBal, message=message, diffmessg=diffmessg)
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = login1()
@@ -205,6 +210,7 @@ def login():
             else:
                 flash('Incorrect password or email')
     return render_template("login.html", form=form)
+
 
 @app.route('/loginEmployee', methods=['GET', 'POST'])
 def login_employee():
@@ -220,11 +226,13 @@ def login_employee():
                 flash('Incorrect password or email')
     return render_template("loginEmployee.html",loginForm=loginForm)
 
+
 @app.route('/logout')
 @login_required()
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
 
 @app.route('/checkUser')
 def checkUser():
@@ -233,15 +241,18 @@ def checkUser():
     else:
         return '<h1> You are logged out </h1>'
 
+
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
+
 
 @app.route('/profile')
 @login_required('CUSTOMER')
 def user_profile():
     return render_template("profile.html", user = current_user)
 
+  
 @app.route('/managerPage',methods=['GET', 'POST'])
 @login_required('MANAGER')
 def manager_page():
@@ -262,6 +273,7 @@ def manager_page():
 
     return render_template("managerPage.html",managerForm=managerForm)
 
+  
 @app.route('/chefPage',methods=['GET', 'POST'])
 @login_required('CHEF')
 def chef_Page():
@@ -319,6 +331,7 @@ def chef_Page():
 def deliver_Page():
     return render_template("deliverPage.html")
 
+  
 @app.route('/addmoney', methods=['GET', 'POST'])
 @login_required('CUSTOMER')
 def addmoney():
@@ -329,6 +342,7 @@ def addmoney():
         return render_template("addmoney.html",form = form, user = current_user)
     return render_template("addmoney.html",form = form, user = current_user)
 
+
 @app.route('/changeadd', methods=['GET', 'POST'])
 @login_required('CUSTOMER')
 def changeadd():
@@ -338,6 +352,7 @@ def changeadd():
         db.session.commit()
         return render_template("changeadd.html",form = form, user = current_user)
     return render_template("changeadd.html",form = form, user = current_user)
+
 
 @app.route('/argh', methods=['GET'])
 @login_required('CUSTOMER')
