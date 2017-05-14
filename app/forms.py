@@ -75,9 +75,9 @@ class hireEmployee(FlaskForm):
     lastname = StringField('Last name', validators=[InputRequired()])
 
     emplyTypeList = []
-    emplyoeeTypes = get_employee_types()
+    employeeTypes = get_employee_types()
 
-    for type in emplyoeeTypes:
+    for type in employeeTypes:
         emplyTypeList.append((type.typeID,type.description))
 
     typeDropList = SelectField(label="Types of Employees", choices=emplyTypeList)

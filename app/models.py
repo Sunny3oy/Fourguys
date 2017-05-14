@@ -288,6 +288,7 @@ def make_complaint(orderID, chefID, username, comments, isGood):
     db.session.add(stmt)
     db.session.commit()
 
+
 # CHEF-RELATED QUERIES
 
 # calculate the average rating of food item
@@ -348,7 +349,8 @@ def deactivate_account(username):
     db.session.add(stmt)
     db.session.commit()
 
-#Checks if fooditem exists in a menu. True if it does. False otherwise.
+
+# Checks if fooditem exists in a menu. True if it does. False otherwise.
 def is_food_item_exist(menuID, itemID):
     result = MenuItem.query.filter(MenuItem.itemID == itemID, MenuItem.menuID == menuID).all()
     if not result:
@@ -356,39 +358,29 @@ def is_food_item_exist(menuID, itemID):
     else:
         return True
 
-#Function to get size of a table
+
+# Function to get size of a table
 def get_table_size(table):
 
     table_elements = table.query.count()
-    return  table_elements
+    return table_elements
 
-def increment_customer_warning(username):
-    pass
-
-
-def promote_employee(emplID):
-    pass
-
-
-def demote_employee(emplID):
-    pass
-
-
-def fire_employee(emplID):
-    pass
 
 def get_employee_types():
-     emplTypes = EmployeeType.query.all()
-     return emplTypes
+    emplTypes = EmployeeType.query.all()
+    return emplTypes
+
 
 def get_salaries():
     salaries = SalaryBase.query.all()
     return salaries
 
+
 def get_employees():
     employees = Employee.query.all()
-    return  employees
+    return employees
+
 
 def get_customers():
     customers = Customer.query.all()
-    return  customers
+    return customers
