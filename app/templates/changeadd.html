@@ -108,12 +108,13 @@
         <p><a href="#">View order History</a></p>
     </div>
     <div class="col-sm-8 text-left">
-        <h1> Adding Money </h1>
-    <h1> Your account have {{ user.acctBal }}! </h1>
-      <form class="form-signin" method="post" action="/addmoney">
+        <h1> Change your Address </h1>
+        <br>
+    <h1> Your Current Address is {{ user.address }} </h1>
+      <form class="form-signin" method="post" action="/changeadd">
       {{ form.hidden_tag() }}
-      {{ wtf.form_field(form.addmoney) }}
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Add Amount</button>
+      {{ wtf.form_field(form.changeCurAdd) }}
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Change Address</button>
       </form>
     </div>
 

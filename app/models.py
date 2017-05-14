@@ -30,6 +30,8 @@ class Customer(UserMixin, db.Model):
     def get_user_type(self):
         return 'CUSTOMER'
 
+    def get_user_type(self):
+        return "CUSTOMER"
 
 class PaymentInfo(db.Model):
     __tablename__ = 'payment_infos'
@@ -160,6 +162,13 @@ class Employee(UserMixin, db.Model):
         else:
             return 'DELIVERY'
 
+    def get_user_type(self):
+        if self.emplType == 0:
+            return "MANAGER"
+        elif self.emplType == 1:
+            return "CHEF"
+        else:
+            return "DELIVERY"
 
 class EmployeeType(db.Model):
     __tablename__ = 'employee_types'
@@ -407,7 +416,6 @@ def fire_employee(emplID):
     db.session.add(stmt)
     db.session.commit()
 
-
 # calculate the average rating for all
 # food items cooked by a chef
 def get_total_rating(chefID):
@@ -465,3 +473,19 @@ def decline_complaint(complaintID):
             cust.numWarning += 1
             db.session.add_all([complaint_stmt, cust])
     db.session.commit()
+
+    
+#Checks if fooditem exists in a menu. True if it does. False otherwise.
+def is_food_item_exist(menuID, itemID):
+    result = MenuItem.query.filter(MenuItem.itemID == itemID, MenuItem.menuID == menuID).all()
+    if not result:
+        return False
+    else:
+        return True
+
+      
+#Function to get size of a table
+def get_table_size(table):
+
+    table_elements = table.query.count()
+    return table_elements
