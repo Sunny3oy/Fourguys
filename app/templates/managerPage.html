@@ -105,8 +105,14 @@
       <p><a href="#">Manager</a></p>
       <p><a href="#">Complains or Compliments</a></p>
       <p><a href="#">Accept of Reject Button for Each</a></p>
+      <form method="post" action="/managerPage">
+      {{ managerForm.hidden_tag() }}
+      {{ wtf.form_field(managerForm.hire) }}
+      {{ wtf.form_field(managerForm.warning) }}
+      </form>
     </div>
-    <div class="col-sm-8 text-left">
+    <div class="col-sm-8 text-left" style="width: 752px">
+
       <h1>Welcome</h1>
 
        <form method="post" action="/managerPage">
@@ -126,33 +132,26 @@
       {{ wtf.form_field(managerForm.demoteE) }}
       {{ wtf.form_field(managerForm.promoteC) }}
       {{ wtf.form_field(managerForm.demoteC) }}
+      </form>
     </div>
 
 
 
 {##############################}
-    <div class="col-sm-2 sidenav">
-        <p>Buttons here!</p>
-{#        <form method="post" action="/Home1">#}
-{##}
-{#        {% for items in topFoods %}#}
-{#        <p style="font-size: 20px"><strong>{{ items.itemName }}</strong></p>#}
-{#        <p>Price: ${{ items.itemPrice }}</p>#}
-{##}
-{#        <a href="menu">#}
-{#        <img src="static/{{ items.itemPict }}" height="100" width="185" style="user-select: none">#}
-{#        </a>#}
-{#        {% endfor %}#}
-{#        </form>#}
+  <div class="col-sm-2 sidenav" style="width: 300px" >
 
+    <form method="post" action="/managerPage" >
+      {{ managerForm.hidden_tag() }}
+      {{ wtf.form_field(managerForm.employeeDropList) }}
+      {{ wtf.form_field(managerForm.promoteE) }}
+      {{ wtf.form_field(managerForm.demoteE) }}
+      {{ wtf.form_field(managerForm.fire) }}
 
+      {{ wtf.form_field(managerForm.customerDropList) }}
+      {{ wtf.form_field(managerForm.promoteC) }}
+      {{ wtf.form_field(managerForm.demoteC) }}
+      {{ wtf.form_field(managerForm.close) }}
     </form>
-      <div class="well">
-        <p>ADS</p>
-      </div>
-      <div class="well">
-        <p>ADS</p>
-      </div>
     </div>
 
 {##############################}

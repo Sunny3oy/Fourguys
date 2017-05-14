@@ -20,8 +20,8 @@ class Customer(UserMixin, db.Model):
     contactNum = db.Column(db.Integer)
     acctBal = db.Column(db.REAL)
     numWarning = db.Column(db.Integer, default=0)
-    statusVIP = db.Column(db.Boolean, default=False)
-    activated = db.Column(db.Boolean, default=False)
+    statusVIP = db.Column(db.Boolean, default=0)
+    activated = db.Column(db.Boolean, default=0)
     password = db.Column(db.Text)
 
     def __repr__(self):
@@ -416,6 +416,7 @@ def fire_employee(emplID):
     db.session.add(stmt)
     db.session.commit()
 
+    
 # calculate the average rating for all
 # food items cooked by a chef
 def get_total_rating(chefID):
@@ -483,9 +484,29 @@ def is_food_item_exist(menuID, itemID):
     else:
         return True
 
-      
-#Function to get size of a table
+
+# Function to get size of a table
 def get_table_size(table):
 
     table_elements = table.query.count()
     return table_elements
+
+
+def get_employee_types():
+    emplTypes = EmployeeType.query.all()
+    return emplTypes
+
+
+def get_salaries():
+    salaries = SalaryBase.query.all()
+    return salaries
+
+
+def get_employees():
+    employees = Employee.query.all()
+    return employees
+
+
+def get_customers():
+    customers = Customer.query.all()
+    return customers
