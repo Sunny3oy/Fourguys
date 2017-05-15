@@ -300,6 +300,21 @@ def manager_page():
 def hire():
     hireform = hireEmployee()
 
+    emplyTypeList = []
+    employeeTypes = get_employee_types()
+    for type in employeeTypes:
+        emplyTypeList.append((type.typeID, type.description))
+
+    hireform.typeDropList.choices = emplyTypeList
+
+    salaryList = []
+    salaries = get_salaries()
+
+    for salary in salaries:
+        salaryList.append((salary.salaryID, salary.hourBase))
+
+    hireform.salaryDropList.choices = salaryList
+
     #When chefs are created they also need an empty default menu
 
     if hireform.submit.data:
@@ -327,23 +342,6 @@ def hire():
                 print("MENU CREATED!")
             return redirect(url_for('manager_page'))
 
-
-
-    # form = signup()
-    # if form.validate_on_submit():
-    #     if form.password.data != form.conpassword.data:
-    #         flash('Password mush match!')
-    #     else:
-    #         new_user = Customer(username=form.username.data,
-    #                             firstName=form.firstname.data,
-    #                             lastName=form.lastname.data,
-    #                             email=form.email.data,
-    #                             password=form.password.data,
-    #                             address=form.address.data)
-    #         db.session.add(new_user)
-    #         db.session.commit()
-    #         return redirect(url_for('login'))
-
     return render_template("hire.html",hireForm=hireform)
 
   
@@ -354,6 +352,13 @@ def chef_Page():
     addToTheMenu = addToMenu(prefix="Add")
     removeFromMenu = deleteFromMenu(prefix="Delete")
 
+    dropchoices = []
+    fooditem = get_all_food_items()
+    for item in fooditem:
+        dropchoices.append((item.itemID, item.itemName))
+
+    addToTheMenu.droplist.choices = dropchoices
+    removeFromMenu.droplist.choices = dropchoices
     #We need to know which chef is cureently logged in to determine the menu or menus that he/she posseses
     listOfMenuItems = get_all_food_items_by_chef(current_user.id)
 
