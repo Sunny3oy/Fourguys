@@ -38,28 +38,18 @@ class ShopButton(FlaskForm):
     submit = SubmitField("Add to Cart")
 
 class addToMenu(FlaskForm):
-    dropchoices = []
-    fooditem = get_all_food_items()
-    for item in fooditem:
-        dropchoices.append((item.itemID, item.itemName))
-    droplist = SelectField(label="Add Food Item", choices=dropchoices)
+    droplist = SelectField(label="Add Food Item", choices=[])
     submit = SubmitField("Add to Menu")
-
+#
 class deleteFromMenu(FlaskForm):
-    dropchoices = []
-    fooditem = get_all_food_items()
-    for item in fooditem:
-        dropchoices.append((item.itemID, item.itemName))
-    droplist = SelectField(label="Remove Food Item", choices=dropchoices)
+    droplist = SelectField(label="Remove Food Item", choices=[])
     submit = SubmitField("Remove from Menu")
 
-class dropDownFood(FlaskForm):
-    dropchoices = []
-    fooditem = get_all_food_items()
-    for item in fooditem:
-        dropchoices.append((item.itemID,item.itemName))
-    droplist = SelectField(label="Food Items", choices=dropchoices)
-
+class changeMenuInfo(FlaskForm):
+    name = StringField("Change Menu Name")
+    description = StringField("Change Menu Description")
+    submit = SubmitField("Apply Changes")
+    addFoodItemsubmit = SubmitField("Add New Food Item to Restaurant")
 
 class managerButtons(FlaskForm):
     hire = SubmitField("Hire Employee")
@@ -73,31 +63,34 @@ class managerButtons(FlaskForm):
     employeeDropList = SelectField(label="Employees", choices=[])
     customerDropList = SelectField(label="Customers", choices=[])
 
-    
+
 class hireEmployee(FlaskForm):
     username = StringField('Username', validators=[InputRequired()])
     firstname = StringField('First name', validators=[InputRequired()])
     lastname = StringField('Last name', validators=[InputRequired()])
-
-    emplyTypeList = []
-    employeeTypes = get_employee_types()
-
-    for type in employeeTypes:
-        emplyTypeList.append((type.typeID,type.description))
-
-    typeDropList = SelectField(label="Types of Employees", choices=emplyTypeList)
-
-    salaryList = []
-    salaries = get_salaries()
-
-    for salary in salaries:
-        salaryList.append((salary.salaryID,salary.hourBase))
-
-    salaryDropList = SelectField(label="Initial Salary Per Hour", choices=salaryList)
-
+    typeDropList = SelectField(label="Types of Employees", choices=[])
+    salaryDropList = SelectField(label="Initial Salary Per Hour", choices=[])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
     conpassword = PasswordField('Confirm Password', validators=[InputRequired(), Length(min=8, max=80), ])
     submit = SubmitField("Add New Employee To Database")
 
+class addFoodItem(FlaskForm):
+    name = StringField('Item Name', validators=[InputRequired()])
+    description = StringField('Description', validators=[InputRequired(), Length(max=65)])
+    price = FloatField('Price', validators=[NumberRange (min=0)])
+    picture = SelectField("Choose Picture", choices=[])
+    submit = SubmitField("Add New Food Item To Database")
 
+class accept_issuewarning(FlaskForm):
+    accept = SubmitField("Accept")
+    warning = SubmitField("Issue Warning")
 
+class accept_reject(FlaskForm):
+    accept = SubmitField("Accept")
+    reject = SubmitField("Reject")
+
+class complaint(FlaskForm):
+    comp = StringField('Complaint or Compliment', validators=[InputRequired()])
+    isGood = BooleanField('Is Good?')
+    employee = SelectField("Choose Employee",choices=[])
+    submit = SubmitField("Submit Order Complaint")
