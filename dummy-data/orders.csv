@@ -1,10 +1,10 @@
-orderID, username, delivererID, totalPrice, isDelivered
-1, user0, 1007, 200.00, True
-2, user0, 1007, 201.00, True
-3, user0, 1007, 202.00, True
-4, user1, 1008, 200.00
-5, user1, 1008, 201.00
-6, user1, 1008, 202.00
-7, user2, 1009, 200.00, True
-8, user2, 1009, 201.00
-9, user2, 1009, 202.00
+orderID, order_date, username, delivererID, totalPrice, isDelivered
+1, 2017-05-01 11:30, user0, 1007, 200.00, True
+2, 2017-05-02 09:10, user0, 1007, 201.00, True
+3, 2017-05-03 12:30, user0, 1007, 202.00, True
+4, 2017-05-04 15:40, user1, 1008, 200.00
+5, 2017-05-10 11:30, user1, 1008, 201.00
+6, 2017-05-11 17:30, user1, 1008, 202.00
+7, 2017-05-11 17:30, user2, 1009, 200.00, True
+8, 2017-05-11 18:30, user2, 1009, 201.00
+9, 2017-05-11 19:30, user2, 1009, 202.00
