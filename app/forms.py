@@ -36,8 +36,11 @@ class loginEmployee(FlaskForm):
 class menu1(FlaskForm):
     qty = IntegerField('qty', validators=[InputRequired()], default=0)
 
-class custhistory(FlaskForm):
-    edittext = StringField('Comment')
+class complaint(FlaskForm):
+    comp = StringField('Complaint or Compliment', validators=[InputRequired()])
+    isGood = BooleanField('Is Good?')
+    employee = SelectField("Choose Employee",choices=[])
+    submit = SubmitField("Submit Order Complaint")
 
 class PlaceButton(FlaskForm):
     submit = SubmitField("Place Order")

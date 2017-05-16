@@ -21,6 +21,7 @@ class Customer(UserMixin, db.Model):
     acctBal = db.Column(db.REAL)
     numWarning = db.Column(db.Integer, default=0)
     statusVIP = db.Column(db.Boolean, default=0)
+    closerequest = db.Column(db.Boolean)
     activated = db.Column(db.Boolean, default=0)
     password = db.Column(db.Text)
 
@@ -416,7 +417,7 @@ def fire_employee(emplID):
     db.session.add(stmt)
     db.session.commit()
 
-    
+
 # calculate the average rating for all
 # food items cooked by a chef
 def get_total_rating(chefID):
@@ -475,7 +476,7 @@ def decline_complaint(complaintID):
             db.session.add_all([complaint_stmt, cust])
     db.session.commit()
 
-    
+
 #Checks if fooditem exists in a menu. True if it does. False otherwise.
 def is_food_item_exist(menuID, itemID):
     result = MenuItem.query.filter(MenuItem.itemID == itemID, MenuItem.menuID == menuID).all()
@@ -510,3 +511,79 @@ def get_employees():
 def get_customers():
     customers = Customer.query.all()
     return customers
+
+#Get ACTIVATED employeed pairs (id,employee)
+def get_pair_id_employee():
+    employeeList = []
+    employees = get_employees()
+    for employee in employees:
+        if not employee.emplType == 0 and (employee.activated == True):  # Managers (type 0) are not subject to promotions or demotions
+            if employee.emplType == 1:
+                employeeType = "Chef: "
+            else:
+                employeeType = "Delv: "
+            employeeList.append((employee.id, employeeType + employee.firstName + ' ' + employee.lastName + ' $'+ str(get_salary(employee.payGrade).hourBase)))
+    return employeeList
+
+#Returns salary based on emplyee payGrade
+def get_salary(payGrade):
+    return SalaryBase.query.filter(SalaryBase.salaryID==payGrade).first()
+
+#Gets pairs (username,customer name and status)
+def get_pair_id_customer():
+    customersList = []
+    customers = get_customers()
+    for customer in customers:
+        if customer.activated:
+            vip = ""
+            if customer.statusVIP:
+                vip = "VIP: "
+        # Do not forget to put a condition here that checks whether they are MVP or NOT
+            customersList.append((customer.username,vip + customer.firstName + ' ' + customer.lastName))
+    return customersList
+
+#Returns pair (number of demonitions, employee name)
+def get_pair_demotion_emplName():
+    pairs = []
+    employees = get_employees()
+    for employee in employees:
+        if employee.activated: #Only working employees are subject to demonitions
+            pairs.append((employee.numDemotion,employee.firstName + " " + employee.lastName))
+    return pairs
+
+#Returns pair (close request, customer name)
+def get_close_requests():
+    pairs = []
+    customers = get_customers()
+    for customer in customers:
+        print(customer.closerequest)
+        if customer.activated and customer.closerequest:
+            pairs.append(customer.firstName + customer.lastName)
+    return pairs
+
+def get_new_customers_notifications():
+    pairs = []
+    customers = get_customers()
+    for customer in customers:
+        if (not customer.activated) and (not customer.closerequest):
+            #Create accept and reject buttons
+            buttons = accept_reject(prefix=str(customer.username))
+            pairs.append((customer.username, customer.firstName + ' ' + customer.lastName, buttons))
+    return pairs
+
+def get_number_of_orders(username):
+    stmt = db.session.query(func.count(Order.username))\
+        .filter(Order.username == username).scalar()
+    return 0 if stmt is None else stmt
+
+#Get the VIP notifications based orders
+def get_VIP_notifications():
+    grantVip = []
+    customers = get_customers()
+    for customer in customers:
+        orders = get_number_of_orders(customer.username)
+        total = total_money_spent(customer.username)
+        if (orders >= 50) or (total >= 500):
+            if not customer.statusVIP:
+                grantVip.append((customer.username, customer.firstName + ' ' + customer.lastName,orders, total,  ))
+    return grantVip

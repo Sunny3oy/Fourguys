@@ -442,25 +442,43 @@ def changepassword():
 @app.route('/viewhistory', methods=['GET', 'POST'])
 @login_required('CUSTOMER')
 def vhistory():
-    custhist = get_customer_orders(current_user.username)
+    details = []
+    displayOrders = []
+    numbers = [0, 1, 2, 3, 4]
+    ordersmade = get_customer_orders(current_user.username)
+    for order in ordersmade:
+        order_detail = get_order_details(order.orderID)
+        complaintOrder = complaint(prefix=order.username + str(order.orderID))
+        complaintOrder.employee.choices = get_pair_id_employee()
+        displayOrders.append((order.orderID, complaintOrder, current_user.username))
+        details.append(order_detail)
 
-    orderID = []
-    for items in custhist:
-        str = items.orderID
-        orderID.append(str)
-    itemID = []
-    for items in orderID:
-        id = get_order_details(items)
-        for item in id:
-            num = item.itemID
-            itemID.append(num)
-    itemname = []
-    for items in itemID:
-        name = FoodItem.query.filter_by (itemID = items).first()
-        itemname.append(name)
-    print(itemname)
+    displayfood = []
+    for detail in details:
+        for item in detail:
+            food = FoodItem.query.filter(FoodItem.itemID == item.itemID).first()
+            displayfood.append(
+                (food.itemName, food.itemPrice, food.itemRating, item.orderID, item.itemQty, food.itemPict))
 
-    return render_template("viewhistory.html",user = current_user, itemname=itemname)
+    for form in displayOrders:
+        if form[1].submit.data:
+            print("IM HERE SUBMIT")
+            Complaint.query.filter_by(complaintID=form[0]).delete()  # Remove if existing
+            db.session.commit()
+            # Now replace complaint or create new one
+            new_complaint = Complaint(orderID=form[0],
+                                      username=form[2],
+                                      emplID=form[1].employee.data,
+                                      comment=form[1].comp.data,
+                                      isGood=form[1].isGood.data)
+            print("Complaint Made")
+            db.session.add(new_complaint)
+            db.session.commit()
+            return redirect(url_for("user_profile"))
+
+    ####
+    return render_template("viewhistory.html", numbers=numbers, user=current_user, displayOrders=displayOrders,
+                           displayfood=displayfood)
 
 @app.route('/closeaccount', methods=['GET', 'POST'])
 @login_required('CUSTOMER')
@@ -470,7 +488,7 @@ def close():
 @app.route('/terminate', methods=['GET', 'POST'])
 @login_required('CUSTOMER')
 def term():
-    current_user.activated = 0
+    current_user.closerequest = 1
     db.session.commit()
     return redirect("logout")
 
