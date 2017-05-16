@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-    Change password
+    View History
 {% endblock %}
 
 {% block styles %}
@@ -109,22 +109,10 @@
         <p><a href="closeaccount">CLOSE ACCOUNT</a></p>
     </div>
     <div class="col-sm-8 text-left">
-        {% if check %}
-            <h1> Your password is now changed to <br>{{ user.password }}</h1>
-        {% else %}
-        <h1> Change your Password </h1>
-        {% endif %}
-        <br>
-      <form class="form-signin" method="post" action="/changepassword">
-      {{ form.hidden_tag() }}
-          <h2> What is your old password?
-          {{ wtf.form_field(form.oldpassword) }}</h2>
-          <h2>What is your new password?
-          {{ wtf.form_field(form.changeuserpass) }}</h2>
-          <h2> Please confirm your new password.
-          {{ wtf.form_field(form.confirm) }}</h2>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Change Password</button>
-      </form>
+        {% for items in itemname %}
+            <h1>{{ items.itemName }}</h1>
+            <img src="static/{{ items.itemPict }}" height="200" width="285" style="user-select: none">
+        {% endfor %}
     </div>
 
 

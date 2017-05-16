@@ -36,6 +36,9 @@ class loginEmployee(FlaskForm):
 class menu1(FlaskForm):
     qty = IntegerField('qty', validators=[InputRequired()], default=0)
 
+class custhistory(FlaskForm):
+    edittext = StringField('Comment')
+
 class PlaceButton(FlaskForm):
     submit = SubmitField("Place Order")
 

@@ -439,6 +439,41 @@ def changepassword():
                 return render_template("changepassword.html",form = form, user = current_user,check=check)
     return render_template("changepassword.html",form = form, user = current_user,check = check)
 
+@app.route('/viewhistory', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def vhistory():
+    custhist = get_customer_orders(current_user.username)
+
+    orderID = []
+    for items in custhist:
+        str = items.orderID
+        orderID.append(str)
+    itemID = []
+    for items in orderID:
+        id = get_order_details(items)
+        for item in id:
+            num = item.itemID
+            itemID.append(num)
+    itemname = []
+    for items in itemID:
+        name = FoodItem.query.filter_by (itemID = items).first()
+        itemname.append(name)
+    print(itemname)
+
+    return render_template("viewhistory.html",user = current_user, itemname=itemname)
+
+@app.route('/closeaccount', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def close():
+    return render_template("closeaccount.html")
+
+@app.route('/terminate', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def term():
+    current_user.activated = 0
+    db.session.commit()
+    return redirect("logout")
+
 @app.route('/argh', methods=['GET'])
 @login_required('CUSTOMER')
 def argh():
