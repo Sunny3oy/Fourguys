@@ -1,4 +1,7 @@
-orderID, username, delivererID, totalPrice
-1, smei1, 1007, 270.00
-2, smei2, 1008, 1020.00
-3, ichwan, 1008, 250.00
+orderID, order_date, username, delivererID, totalPrice
+1, 2017-05-01 11:30, smei1, 1007, 270.00
+2, 2017-05-02 09:10, smei2, 1008, 1020.00
+3, 2017-05-03 12:30, ichwan, 1008, 250.00
+4, 2017-05-04 15:40, ichwan, 1009, 1250.00
+5, 2017-05-10 11:30, smei1, 1008, 300.0
+6, 2017-05-11 17:30, smei1, 1008, 300.0

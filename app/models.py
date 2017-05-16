@@ -1,5 +1,6 @@
 import faketime
 from app import app
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy import func, desc
@@ -107,6 +108,15 @@ class Order(db.Model):
 
     def __repr__(self):
         return '<orderID: %s, total: %s>' % (self.orderID, self.totalPrice)
+
+
+    @property
+    def order_date(self):
+        return self.orderDate
+
+    @order_date.setter
+    def order_date(self, data):
+        self.orderDate = datetime.strptime(data, '%Y-%m-%d %H:%M')
 
 
 class OrderDetail(db.Model):
@@ -382,7 +392,13 @@ def total_money_spent(username):
     stmt = db.session.query(func.sum(Order.totalPrice)) \
         .filter(Order.username == username) \
         .scalar()
-    return round(stmt)
+    return 0 if stmt is None else round(stmt)
+
+
+def get_number_of_orders(username):
+    stmt = db.session.query(func.count(Order.username))\
+        .filter(Order.username == username).scalar()
+    return 0 if stmt is None else stmt
 
 
 # return all employees in the database
