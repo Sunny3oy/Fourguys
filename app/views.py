@@ -80,6 +80,7 @@ def home():
 def menu():
     check = current_user.is_authenticated
     # typeofUser=""
+    numberType = 5
     if check:
         typeofUser = current_user.get_user_type()
         if typeofUser == "CUSTOMER":

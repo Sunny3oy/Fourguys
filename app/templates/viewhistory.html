@@ -83,7 +83,6 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">Logo</a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
@@ -91,9 +90,6 @@
         <li><a href="menu">Menus</a></li>
         <li><a href="profile">Profile</a></li>
         <li><a href="logout">Log Out</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
       </ul>
     </div>
   </div>
@@ -111,9 +107,16 @@
     <div class="col-sm-8 text-left">
         <form method="post" action="/profile">
             {% for order in displayOrders %}
-
                 <p style="font-size: 25px">Order Number:{{ order[0] }}</p>
                 <hr>
+                {{ order[1].hidden_tag() }}
+                {{ wtf.form_field(order[1].comp) }}
+                {{ wtf.form_field(order[1].isGood) }}
+                {{ wtf.form_field(order[1].employee) }}
+                {{ wtf.form_field(order[1].submit) }}
+                <br>
+                <br>
+                <br>
                 {% for food in displayfood %}
                 {% if order[0] == food[3] %}
                     <div class="col-md-4">
@@ -135,14 +138,6 @@
 {#                <div class="col-md-4"><p>LOOL</p></div>#}
                 {% endif %}
                 {% endfor %}
-
-
-                {{ order[1].hidden_tag() }}
-                {{ wtf.form_field(order[1].comp) }}
-                {{ wtf.form_field(order[1].isGood) }}
-                {{ wtf.form_field(order[1].employee) }}
-                {{ wtf.form_field(order[1].submit) }}
-
 
             {% endfor %}
 
