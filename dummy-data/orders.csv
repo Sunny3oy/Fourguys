@@ -1,4 +1,10 @@
-orderID, username, delivererID, totalPrice
-1, smei1, 1007, 270.00
-2, smei2, 1008, 1020.00
-3, ichwan, 1008, 250.00
+orderID, username, delivererID, totalPrice, isDelivered
+1, user0, 1007, 200.00, True
+2, user0, 1007, 201.00, True
+3, user0, 1007, 202.00, True
+4, user1, 1008, 200.00
+5, user1, 1008, 201.00
+6, user1, 1008, 202.00
+7, user2, 1009, 200.00, True
+8, user2, 1009, 201.00
+9, user2, 1009, 202.00
