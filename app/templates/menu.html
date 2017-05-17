@@ -23,7 +23,7 @@
        width: 200px;
          background-color: lightcyan;
      }
-    p{
+    p,a{
         font-family: "Allerta Stencil";
         font-size: 14px;
         font-style: normal;
@@ -76,7 +76,8 @@
 {% endblock %}
 
 {% block content %}
-{# nav bar starts #}
+<img src="static/LogoSample_ByTailorBrands.jpg" height="150" width="150" style="user-select: none; margin-left: 550px;margin-bottom: 30px;">
+
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
@@ -88,7 +89,7 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
-         <li><a href="/">Home</a></li>
+       <li><a href="/">Home</a></li>
        <li><a href="menu">Menu</a></li>
        <li><a href="contact">Contact Us</a></li>
         {% if check %}

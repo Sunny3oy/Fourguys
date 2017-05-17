@@ -24,7 +24,7 @@
          background-color: lightcyan;
 
      }
-    p{
+    p,a{
         font-family: "Allerta Stencil";
         font-size: 14px;
         font-style: normal;
@@ -98,7 +98,9 @@
 <div class="container-fluid text-center">
   <div class="row content">
     <div class="col-sm-2 sidenav">
+        <img src="static/LogoSample_ByTailorBrands.jpg" height="150" width="150" style="user-select: none">
         <p>{{ user.firstName }}</p>
+        <br>
       <p><a href="addmoney">Add Money</a></p>
       <p><a href="changepassword">Change Password</a></p>
       <p><a href="changeadd">Change Address</a></p>
@@ -131,7 +133,55 @@
         <h1>Your warnings!</h1>
         <p>If you troll or provide unreasonable feedbacks, you will be warned!</p>
         <p>Your total warnings: {{user.numWarning}} </p>
+        <br>
+        <br>
+        <form method="post" action="/profile">
+            {% for order in displayOrders %}
 
+                <p style="font-size: 25px">Order Number:{{ order[0] }}</p>
+                <hr>
+                {% for food in displayfood %}
+                {% if order[0] == food[3] %}
+                <div class="col-md-4">
+                <p>{{ food[0] }}</p>
+                <p>Price:${{ food[1] }}</p>
+                    {% for number in numbers %}
+                    {% if number < food[2] %}
+                    <i class="fa fa-heart" style="color: #ff9acd" aria-hidden="true"></i>
+                    {% else %}
+                    <i class="fa fa-heart-o" style="color: #ff9acd" aria-hidden="true"></i>
+                    {% endif %}
+                    {% endfor %}
+                <p>Rating: {{ food[2] }}</p>
+                <p>Ordered Quantity:{{ food[4] }}</p>
+                 <img src="static/{{ food[5] }}" height="100" width="150" style="user-select: none">
+                 {{ food[6].hidden_tag() }}
+                {{ wtf.form_field(food[6].rate) }}
+                {{ wtf.form_field(food[6].submit) }}
+                <p></p>
+                </div>
+{#                <div class="col-md-4"><p>LOOL</p></div>#}
+                {% endif %}
+                {% endfor %}
+                <br>
+
+
+                <div>
+
+                {{ order[1].hidden_tag() }}
+                {{ wtf.form_field(order[1].comp) }}
+                {{ wtf.form_field(order[1].isGood) }}
+                {{ wtf.form_field(order[1].employee) }}
+                {{ wtf.form_field(order[1].submit) }}
+{#                 <div class="col-md-4">#}
+{#                <div class="row" style="float: none">#}
+                </div>
+
+                <br>
+                <br>
+            {% endfor %}
+
+    </form>
 {#      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>#}
     </div>
 
@@ -144,8 +194,6 @@
 </div>
 
 
-    <form method="post" action="/chefPage">
-    </form>
     <form method="post" action="/chefPage">
     </form>
 {% endblock %}
