@@ -215,6 +215,7 @@ def checkout():
     # If the checkout menu is refreshed, the user will be redirected to menu page
     cartTotal = session.get('ProductTotal')
     custaccbal = current_user.acctBal
+    vip = current_user.statusVIP
     vip_price = 0
     if cartTotal == 0:
 
@@ -226,7 +227,6 @@ def checkout():
             if cartTotal > custaccbal:
                 message = 'Seems like you need a new job.'
             else:
-                vip = current_user.statusVIP
                 if vip:
                     message = "You are VIP. 10% Discount was applied"
                     vip_price = cartTotal*.90
