@@ -251,7 +251,23 @@ def contact():
 @app.route('/profile')
 @login_required('CUSTOMER')
 def user_profile():
-    return render_template("profile.html", user = current_user)
+    orders = []
+    orders = get_customer_orders(current_user.username)
+    numorders = len(orders)
+    orderprice = []
+    for items in orders:
+        price = items.totalPrice
+        orderprice.append(price)
+    totalprice = sum(orderprice)
+    if numorders >= 50:
+        flagorder = 1
+    else:
+        flagorder = 0
+    if totalprice >= 500:
+        flagprice = 1
+    else:
+        flagprice = 0
+    return render_template("profile.html", user = current_user, numorders=numorders, totalprice = totalprice,flagorder=flagorder,flagprice=flagprice)
 
   
 @app.route('/managerPage',methods=['GET', 'POST'])
@@ -484,7 +500,7 @@ def vhistory():
 @app.route('/closeaccount', methods=['GET', 'POST'])
 @login_required('CUSTOMER')
 def close():
-    return render_template("closeaccount.html")
+    return render_template("closeaccount.html", user = current_user)
 
 @app.route('/terminate', methods=['GET', 'POST'])
 @login_required('CUSTOMER')

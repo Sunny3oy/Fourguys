@@ -18,7 +18,7 @@ class Customer(UserMixin, db.Model):
     zipcode = db.Column(db.Integer)
     email = db.Column(db.String(30), unique=True)
     contactNum = db.Column(db.Integer)
-    acctBal = db.Column(db.REAL)
+    acctBal = db.Column(db.REAL,default=0)
     numWarning = db.Column(db.Integer, default=0)
     statusVIP = db.Column(db.Boolean, default=0)
     closerequest = db.Column(db.Boolean)
