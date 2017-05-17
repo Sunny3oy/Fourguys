@@ -1,10 +1,332 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-</body>
-</html>
+{% block title %}
+    Delivery Page
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
+<link href="https://fonts.googleapis.com/css?family=Allerta+Stencil" rel="stylesheet">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+    <style>
+    {#  Using FontAwesome for heart icons #}
+     @import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css);
+     input[type="text"] {
+       width: 200px;
+         background-color: lightcyan;
+
+     }
+    p{
+        font-family: "Allerta Stencil";
+        font-size: 14px;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 300;
+        line-height: 16px;
+    }
+    h1{
+        font-family: "Allerta Stencil";
+        font-style: normal;
+        font-variant: normal;
+        font-weight: 700;
+        line-height: 16px;
+    }
+
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 450px}
+
+    /* Set gray background color and 100% height */
+    .sidenav {
+      padding-top: 20px;
+      background-color: #f1f1f1;
+      height: 100%;
+    }
+
+    /* Set black background color, white text and some padding */
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+    }
+
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height:auto;}
+    }
+
+		#map {
+			width: 100%;
+			height: 100%;
+			margin: auto;
+			display: block;
+		}
+
+    </style>
+
+	<script>
+
+		world_map = {{world_map|safe}};
+		function test_print(str) {
+			var box = document.getElementById('test-block');
+			box.innerHTML = box.innerHTML + str;
+		}
+
+		// Arguments: (All pixels)
+		// - top: A top coordinate
+		// - left: A left coordinate
+		// - width: width of the rectangle
+		// - height: height of the rectangle
+		function draw_box(top, left, width, height, color) {
+			var canvas = document.getElementById('map');
+			var context = canvas.getContext('2d');
+			context.fillStyle = color;
+
+			context.fillRect(top, left, width, height);
+		}
+
+		// Arguments:
+		// - beginning, end: coordinates on the canvas in form [x,y].
+		// - width is an integer.
+		// - color is a string. It's a valid fill style for context.
+		function draw_line(beginning, end, width, color) {
+			var canvas = document.getElementById('map');
+			var context = canvas.getContext('2d');
+
+			context.lineWidth = width;
+			context.strokeStyle = color;
+
+			context.beginPath();
+			context.moveTo(beginning[0], beginning[1]);
+			context.lineTo(end[0], end[1]);
+			context.closePath();
+			context.stroke();
+		}
+
+		// Position is an integer representing a position in world_map, which is
+		// an adjacency matrix.
+		function position_to_vertex(position) {
+			return [ position % {{map_width}},
+								Math.floor(position/{{ map_height }})];
+		}
+
+		// TODO: Base the multiiplier on the canvas object's width/length.
+		// Arguments
+		// - vertex is a map vertex, as produced by the function
+		//	 `position_to_vertex`
+		function vertex_to_map_coordinate(vertex) {
+			var canvas = document.getElementById('map');
+			var hScale = canvas.width / {{ map_width}};
+			var vScale = canvas.height / {{ map_width}};
+			return [ hScale * vertex[0], vScale * vertex[1] ];
+		}
+
+		function position_to_map_coordinate(position) {
+			return vertex_to_map_coordinate(position_to_vertex(position));
+		}
+
+		// Arguments
+		// - coordinate is a canvas coordinate, in the form [x,y].
+		// - color is a valid choice for a context style. A valid CSS color as a string.
+		function draw_dot(coordinate, color, radius) {
+			var canvas = document.getElementById('map');
+			var context = canvas.getContext('2d');
+			context.fillColor = color;
+
+			context.beginPath();
+			context.arc(coordinate[0], coordinate[1], radius, 0, 2*Math.PI);
+			context.fill();
+			context.closePath();
+		}
+
+		// Arguments:
+		// - position is a position on the world_map.
+		function draw_position(position, color='black') {
+			var coord = position_to_map_coordinate(position);
+			draw_dot(coord, color, 5);
+		}
+
+
+		// Arguments:
+		// - beginning, end: Positions in the adjacency matrix.
+		// - 
+		function draw_arc(beginning, end, weight) {
+			// Go from positions to canvas coordinates.
+			var coords = [beginning, end].map( 
+				x => vertex_to_map_coordinate(position_to_vertex(x))
+			)
+
+			// To go from weights to colors.
+			var weight_to_color_map = {
+				1 : 'rgb(217, 217, 217)', //grayish
+				2 : 'rgb(102, 255, 102)', //green
+				3 : 'rgb(255, 255, 102)', //yellow
+				4 : 'rgb(255, 204, 153)', //orange
+				5 : 'rgb(255, 0, 102)'    //red
+			}
+			draw_line(coords[0], coords[1], 3, weight_to_color_map[weight])
+		}
+
+		// TODO: Draw the restaurant's location.
+		// TODO: Offset the grid so it's not chopped off at the edge.
+		function draw_grid(){
+			var grid = {{ world_map|safe }};
+			var canvas = document.getElementById('map');
+			var context = canvas.getContext('2d');
+			// Shift everything over first, so that I can continue drawing
+			// with (0,0) as my origin without that being the absolute
+			// top-left corner.
+			// 10, 10 is chosen as twice the dot radius, arbitrarily.
+			context.translate(10, 10);
+
+			// Draw edges from vertex to vertex. Edges only exist when the entry
+			// in the adjacency matrix is not 'null'.
+			for (let row = 0; row < grid.length; row++)
+				for (let col = 0; col < grid[row].length; col++)
+					if (grid[row][col] !== 'null') {
+						draw_arc(row, col, grid[row][col]);
+					}
+
+			// Draw dots for intersections.
+			for (let row = 0; row < grid.length; row++)
+				draw_position(row);
+
+		}
+
+		// Arguments:
+		// - path is a list of vertices, each in the form [x,y], though
+		//	 these are not canvas coordinates.
+		function draw_path(path) {
+			var canvas = document.getElementById('map');
+			var context = canvas.getContext('2d');
+			var coords = path.map( x => vertex_to_map_coordinate(x) );
+			var oldDashPattern = context.getLineDash();
+			context.setLineDash([5,10]);
+			while (coords.length > 1) {
+				// Draw a short thin line from vertex to vertex.
+				draw_line(coords[0], coords[1], 1, 'black');
+				coords.shift();
+			}
+			context.setLineDash(oldDashPattern);
+		}
+
+		window.onload = function() {
+			//var box = document.getElementById('test-block')
+			//box.innerHTML = "hey."
+			//draw_box(10, 10, 10, 20, 'black');
+			draw_grid();
+			draw_path( {{route}} );
+		}
+	</script>
+
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Logo</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Projects</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid text-center">
+  <div class="row content">
+    <div class="col-sm-2 sidenav">
+      <p><a href="#">Delivery Name,Description,Picture</a></p>
+      <p><a href="#">Link</a></p>
+      <p><a href="#">Link</a></p>
+    </div>
+    <div class="col-sm-8 text-left">
+      <h1>Welcome</h1>
+
+			{% if currentOrder == None %}
+				<p> 
+					You don't have any orders to deliver right now. Why don't you
+					look at your order history and complain a little? 
+				</p>
+			{% else %}
+				<p> Delivering To: {{customer_name}} </p>
+				<p> {{customer_address}} </p>
+				<canvas id="map"></canvas>
+			{% endif %}
+
+      <hr>
+			<div id="test-block">
+				<h3>Test</h3>
+				<p>Lorem ipsum...</p>
+				{#
+				ROUTE: {{ route }}
+				WEIGHT: {{ route_weight }}
+				<p>
+					Graph: 
+					{% for x in world_map %}
+						<p> {{x}} </p>
+					{% endfor %}
+				</p>
+				<p>
+					ALL ROUTES:
+				</p>
+					{% for x in allRoutes %}
+						<p> {{x}} </p>
+					{% endfor %}
+					#}
+			</div>
+    </div>
+
+
+
+{##############################}
+
+    <div class="col-sm-2 sidenav">
+				<ul>
+					<li><a href="/deliveryPage"> Delivery Page </a></li>
+					<li><a href="/deliveryPage/orderHistory"> Order History </a></li>
+					<li><a href="/deliveryPage/activeOrders"> Active Orders </a></li>
+				</ul>
+    </div>
+
+{##############################}
+
+  </div>
+</div>
+
+<footer class="container-fluid text-center">
+  <p>Footer Text</p>
+</footer>
+
+
+{% endblock %}

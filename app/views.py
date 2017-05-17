@@ -4,6 +4,8 @@ from .forms import *
 from .models import *
 from flask import render_template, flash, url_for, redirect, session, current_app
 from flask_login import *
+# For the deliveryPage.
+from app import delivery
 
 
 # override the built-in login_required() function
@@ -29,7 +31,7 @@ def login_required(role='ANY'):
 
 @app.login_manager.user_loader
 def load_user(user_id):
-    print(user_id)
+    print("Loaded user:", user_id)
     if int(user_id) > 1000: #Only employees have ID's > 1000
         return Employee.query.get(int(user_id))
     else:
@@ -192,6 +194,7 @@ def checkout():
                 message = 'Good to go!'
                 diffmessg = "Difference " + str(current_user.acctBal) + " - " + str(cartTotal) + " = " + str(difference)
                 current_user.acctBal = current_user.acctBal - cartTotal
+                print("current_user", current_user) #DEBUG
                 db.session.add(current_user)
                 db.session.commit()
                 session['orderMade'] = True
@@ -344,7 +347,143 @@ def hire():
 
     return render_template("hire.html",hireForm=hireform)
 
-  
+def create_delivery_page(currentOrder=None):
+    # Turn all python iterators into lists so that javascript can use
+    # them. Assumes that lst is an iterator.
+    # TODO: Fix this.
+    def listify(lst):
+        this_list = list(lst)
+        new_list = []
+        for x in this_list:
+            if type(x) == type(()):
+                new_list.append(listify(x))
+            else:
+                new_list.append(x)
+        return new_list
+
+    map_width = delivery.Map.width
+    map_height = delivery.Map.height
+    # convert the graph to a format that javascript can understand.
+    compatible_map =\
+        list(map( lambda lst: ["null" if x == None else x for x in lst],
+            delivery.Map.graph))
+
+
+    if currentOrder == None:
+        currentOrder = get_first_order_by_delivery_person(current_user.id)
+    else:
+        currentOrder = Order.query.filter_by(orderID=currentOrder).first()
+    print("Current Order:", currentOrder)
+    if currentOrder == None:
+        return render_template("deliveryPage.html",
+                world_map=compatible_map,
+                map_width=map_width,
+                map_height=map_height,
+                restaurantLocation=delivery.Map.restaurantLocation,
+                customer_address=None,
+                route=None,
+                route_weight=None,
+                currentOrder=None
+                )
+
+    customer_address = currentOrder.custRel.address
+    customer_name = "{} {}".format(\
+            currentOrder.custRel.firstName,
+            currentOrder.custRel.lastName)
+
+    route, route_weight = delivery.shortest_route(customer_address)
+
+    route = [list(x) for x in route]
+    return render_template("deliveryPage.html",
+            world_map=compatible_map,
+            map_width=map_width,
+            map_height=map_height,
+            restaurantLocation=delivery.Map.restaurantLocation,
+            route=route,
+            route_weight=route_weight,
+            customer_address=customer_address,
+            customer_name=customer_name
+            )
+
+@app.route('/deliveryPage', methods=['GET', 'POST'])
+@login_required('DELIVERY')
+def delivery_page():
+
+    # Turn all python iterators into lists so that javascript can use
+    # them. Assumes that lst is an iterator.
+    # TODO: Fix this.
+    def listify(lst):
+        this_list = list(lst)
+        new_list = []
+        for x in this_list:
+            if type(x) == type(()):
+                new_list.append(listify(x))
+            else:
+                new_list.append(x)
+        return new_list
+
+    map_width = delivery.Map.width
+    map_height = delivery.Map.height
+    # convert the graph to a format that javascript can understand.
+    compatible_map =\
+        list(map( lambda lst: ["null" if x == None else x for x in lst],
+            delivery.Map.graph))
+
+
+    currentOrder = get_first_order_by_delivery_person(current_user.id)
+    print("Current Order:", currentOrder)
+    if currentOrder == None:
+        return render_template("deliveryPage.html",
+                world_map=compatible_map,
+                map_width=map_width,
+                map_height=map_height,
+                restaurantLocation=delivery.Map.restaurantLocation,
+                customer_address=None,
+                route=None,
+                route_weight=None,
+                currentOrder=None
+                )
+
+    customer_address = currentOrder.custRel.address
+    customer_name = "{} {}".format(\
+            currentOrder.custRel.firstName,
+            currentOrder.custRel.lastName)
+
+    route, route_weight = delivery.shortest_route(customer_address)
+
+    route = [list(x) for x in route]
+    return render_template("deliveryPage.html",
+            world_map=compatible_map,
+            map_width=map_width,
+            map_height=map_height,
+            restaurantLocation=delivery.Map.restaurantLocation,
+            route=route,
+            route_weight=route_weight,
+            customer_address=customer_address,
+            customer_name=customer_name
+            )
+
+@app.route('/deliveryPage/orderHistory')
+def deliveryOrderHistory():
+    currentDBoy = current_user.id
+    orders = get_all_orders_by_delivery_person(currentDBoy)
+    return render_template("deliveryOrderHistory.html",
+                orders=orders)
+
+@app.route('/deliveryPage/activeOrders')
+def deliveryActiveOrders():
+    currentDBoy = current_user.id
+    orders = get_active_orders_by_delivery_person(currentDBoy)
+    return render_template("deliveryActiveOrders.html",
+                orders=orders)
+
+@app.route('/deliveryPage/warnCustomer/<user_id>')
+def deliveryWarnCustomer(user_id):
+    print("User to Warn:", user_id)
+    make_warning(user_id)
+    return redirect("/deliveryPage")
+
+
 @app.route('/chefPage',methods=['GET', 'POST'])
 @login_required('CHEF')
 def chef_Page():

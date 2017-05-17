@@ -76,7 +76,9 @@ class WorldMap:
         match = self.address_validator.fullmatch(address)
         if not match:
             return False
-        x, y = int(match.group(1)) - 1, int(match.group(0)) - 1
+        #print( match.group(1) )
+        #print( match.group(2) )
+        x, y = int(match.group(2)) - 1, int(match.group(1)) - 1
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return False
         return True
@@ -86,7 +88,7 @@ class WorldMap:
     def is_vertex(self, v):
         return type(v) == type(())
     def is_address(self, v):
-        return type(v) == type("") and validate_address(v)
+        return type(v) == type("") and self.validate_address(v)
 
     # vertex: A tuple of integers representing the block you're on.
     # Returns: A list of the vertices which are neighbors of vertex.
@@ -342,8 +344,8 @@ def validate_address_test():
         ( "Sky Street 123 Sky Avenue 456", True ),
     ]
 
-    passed = [x for (x,y) in cases if validate_address(x) == y]
-    failed = [x for (x,y) in cases if validate_address(x) != y]
+    passed = [x for (x,y) in cases if self.validate_address(x) == y]
+    failed = [x for (x,y) in cases if self.validate_address(x) != y]
 
     if len(failed) == 0:
         return True
