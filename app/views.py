@@ -2,6 +2,7 @@ from functools import wraps
 #Office: We's NAC 8/209
 from .forms import *
 from .models import *
+from random import choice
 from flask import render_template, flash, url_for, redirect, session, current_app
 from flask_login import *
 # For the deliveryPage.
@@ -241,7 +242,7 @@ def checkout():
 
                 #Process Order, meaning create Order
                 new_order = Order(username=current_user.username,
-                                  delivererID=1008, #ICHWAN PUT YOUR RANDOM DELIVERY GUYS FUNCTION
+                                  delivererID=choice(get_all_delivery_person()),
                                     totalPrice=session.get('ProductTotal'),
                                     isDelivered=False)
                 db.session.add(new_order)
