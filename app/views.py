@@ -492,10 +492,11 @@ def vhistory():
             db.session.add(new_complaint)
             db.session.commit()
             return redirect(url_for("user_profile"))
-
-    ####
+    check = 0
+    if len(displayfood) == 0:
+        check = 1
     return render_template("viewhistory.html", numbers=numbers, user=current_user, displayOrders=displayOrders,
-                           displayfood=displayfood)
+                           displayfood=displayfood,check=check)
 
 @app.route('/closeaccount', methods=['GET', 'POST'])
 @login_required('CUSTOMER')

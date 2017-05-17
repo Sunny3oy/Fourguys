@@ -106,6 +106,9 @@
         <p><a href="closeaccount">CLOSE ACCOUNT</a></p>
     </div>
     <div class="col-sm-8 text-left">
+        {% if check %}
+            <h1>Looks like you have not made any orders yet!</h1>
+        {% endif %}
         <form method="post" action="/profile">
             {% for order in displayOrders %}
                 <p style="font-size: 25px">Order Number:{{ order[0] }}</p>
