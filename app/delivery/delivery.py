@@ -1,7 +1,8 @@
 # Regular expressions, for validation.
 import re
 # Random number generation.
-import secrets 
+#import secrets 
+import random
 # Heap-based priority queue
 import heapq
 
@@ -32,13 +33,16 @@ import heapq
 
 # Generates a number in [low, high) with uniform probability.
 def uniformRandom(low, high):
-    return low + secrets.randbelow(high - low)
+    #return low + secrets.randbelow(high - low)
+    return random.randrange(low, high+1)
 # Generates a 1 with 40% probability, 2 with 30% probability, ... so on.
 def lightdayRandom():
-    return secrets.choice( [ *[1]*40, *[2]*30, *[3]*15, *[4]*10, *[5]*5 ] )
+    #return secrets.choice( [ *[1]*40, *[2]*30, *[3]*15, *[4]*10, *[5]*5 ] )
+    return random.choice( [ *[1]*40, *[2]*30, *[3]*15, *[4]*10, *[5]*5 ] )
 # Larger numbers are more probable here.
 def heavydayRandom():
-    return secrets.choice( [ *[1]*20, *[2]*30, *[3]*25, *[4]*15, *[5]*10 ] )
+    #return secrets.choice( [ *[1]*20, *[2]*30, *[3]*25, *[4]*15, *[5]*10 ] )
+    return random.choice( [ *[1]*20, *[2]*30, *[3]*25, *[4]*15, *[5]*10 ] )
 # Create a table of random things that could happen to an existing map,
 # and pair them with transformations on the map.
 def somethingHappens():
