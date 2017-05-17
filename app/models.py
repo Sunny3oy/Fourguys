@@ -462,6 +462,18 @@ def get_all_employees():
     return Employee.query.all()
 
 
+# return a list of EMPLIDs of employees that are delivery boys
+def get_all_delivery_person():
+    result = db.session.query(Employee.id).filter(Employee.emplType == 2).all()
+    return [employee[0] for employee in result]
+
+
+# return a list of EMPLIDs of employees that are chefs
+def get_all_chef():
+    result = db.session.query(Employee.id).filter(Employee.emplType == 1).all()
+    return [employee[0] for employee in result]
+
+
 # increase the pay grade of the employee
 def promote_employee(emplID):
     stmt = Employee.query.filter(Employee.id == emplID).first()
@@ -568,7 +580,6 @@ def is_food_item_exist(menuID, itemID):
 
 # Function to get size of a table
 def get_table_size(table):
-
     table_elements = table.query.count()
     return table_elements
 
