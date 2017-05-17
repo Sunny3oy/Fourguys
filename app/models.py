@@ -1,5 +1,6 @@
 import faketime
 from app import app
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy import func, desc
@@ -103,13 +104,39 @@ class Order(db.Model):
     delivererID = db.Column(db.Integer, db.ForeignKey('employees.id'))
     orderDate = db.Column(db.DateTime, default=faketime.FakeTime.get_now())
     totalPrice = db.Column(db.REAL)
-    isDelivered = db.Column(db.Boolean)
+    isDelivered = db.Column(db.Boolean, default=False)
 
     custRel = db.relationship('Customer', backref='orderRel')
     dboyRel = db.relationship('Employee', backref='orderRel')
 
     def __repr__(self):
-        return '<orderID: %s, total: %s>' % (self.orderID, self.totalPrice)
+        return '<orderID: %s, total: %s, Delivered: %s>' % (self.orderID, self.totalPrice, self.isDelivered)
+
+    @property
+    def is_delivered():
+        return self.isDelivered
+
+    @is_delivered.setter
+    def is_delivered(self, value):
+        if type(value) == type(True):
+            self.isDelivered = value
+        elif type(value) == type(""):
+            if value == "True":
+                self.isDelivered = True
+            elif value == "False":
+                self.isDelivered = False
+            else:
+                self.isDelivered = None
+        else:
+            self.isDelivered = None
+
+    @property
+    def order_date(self):
+        return self.orderDate
+
+    @order_date.setter
+    def order_date(self, data):
+        self.orderDate = datetime.strptime(data, '%Y-%m-%d %H:%M')
 
 
 class OrderDetail(db.Model):
@@ -207,7 +234,7 @@ class Complaint(db.Model):
         return '<complaintID: %s, isGood: %s>' % (self.complaintID, self.isGood)
 
 
-# MENU-RELATED QUERIES
+# MENU-RELATED QUERIES: {{{ ################################
 
 # returns all food items that are available in the database
 def get_all_food_items():
@@ -244,8 +271,9 @@ def get_all_menus_by_chef(chefID):
     return Menu.query\
         .filter(Menu.chefID == chefID).all()
 
+# }}} ######################################################
 
-# CUSTOMER-RELATED QUERIES
+# CUSTOMER-RELATED QUERIES: {{{ ############################
 
 # returns the last five items ordered by the customer
 def get_top_five_items(username):
@@ -306,8 +334,33 @@ def make_complaint(orderID, emplID, username, comments, isGood):
     db.session.add(stmt)
     db.session.commit()
 
+# }}} ######################################################
 
-# CHEF-RELATED QUERIES
+# DELIVERY-BOY RELATED QUERIES: {{{#########################
+
+def get_all_orders_by_delivery_person(emplID):
+    return Order.query.filter(Order.delivererID == emplID).all()
+
+def get_first_order_by_delivery_person(emplID):
+    return Order.query.filter(\
+            Order.delivererID == emplID,
+            Order.isDelivered != True).first()
+
+def get_active_orders_by_delivery_person(emplID):
+    return Order.query.filter(\
+            Order.delivererID == emplID,
+            Order.isDelivered != True)\
+          .order_by(Order.orderDate).all()
+
+def make_warning(custID):
+    customer = Customer.query.filter_by(id=custID).first()
+    customer.numWarning = customer.numWarning + 1
+    db.session.add(customer)
+    db.session.commit()
+
+# }}} ######################################################
+
+# CHEF-RELATED QUERIES: {{{ ################################
 
 # calculate the average rating of food item
 # associated with a menu from all the records
@@ -336,8 +389,9 @@ def check_delivered(orderID):
     db.session.add(stmt)
     db.session.commit()
 
+# }}} ######################################################
 
-# MANAGER-RELATED QUERIES
+# MANAGER-RELATED QUERIES: {{{ #############################
 
 # returns all new customers request
 # for accounts
@@ -395,6 +449,12 @@ def total_money_spent(username):
         .filter(Order.username == username) \
         .scalar()
     return 0 if stmt is None else round(stmt)
+
+  
+def get_number_of_orders(username):
+    stmt = db.session.query(func.count(Order.username))\
+        .filter(Order.username == username).scalar()
+    return 0 if stmt is None else stmt
 
 
 # return all employees in the database
@@ -532,6 +592,7 @@ def get_customers():
     customers = Customer.query.all()
     return customers
 
+
 #Get ACTIVATED employeed pairs (id,employee)
 def get_pair_id_employee():
     employeeList = []
@@ -626,4 +687,4 @@ def drop_customer_VIP_list():
         if customer.activated and (customer.numWarning == 2) and customer.statusVIP:
             drop.append(customer.firstName + ' ' + customer.lastName)
     return drop
-  
+# }}} ######################################################

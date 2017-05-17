@@ -76,7 +76,9 @@ class WorldMap:
         match = self.address_validator.fullmatch(address)
         if not match:
             return False
-        x, y = int(match.group(1)) - 1, int(match.group(0)) - 1
+        #print( match.group(1) )
+        #print( match.group(2) )
+        x, y = int(match.group(2)) - 1, int(match.group(1)) - 1
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return False
         return True
@@ -86,7 +88,7 @@ class WorldMap:
     def is_vertex(self, v):
         return type(v) == type(())
     def is_address(self, v):
-        return type(v) == type("") and validate_address(v)
+        return type(v) == type("") and self.validate_address(v)
 
     # vertex: A tuple of integers representing the block you're on.
     # Returns: A list of the vertices which are neighbors of vertex.
@@ -130,15 +132,16 @@ class WorldMap:
     # - position: An integer representing a vertex in the Map. They're
     #   necessary for accessing positions on the graph when the graph
     #   is a list. For any vertex (x, y) the corresponding position is
-    #   x * height + y.
+    #   x + y*width
     # - address: Street addresses representing vertices on the map.
     #   They're of the form "Sky Street <street-num> Sky Avenue
     #   <ave-num>. The corresponding vertex is (<ave-num>,
     #   <street-num>).
     def vertex_to_position(self, v):
-        return v[0]*self.height + v[1]
+        #return v[0]*self.height + v[1]
+        return v[0] + v[1]*self.width
     def position_to_vertex(self, position):
-        return (position//self.height, position % self.height)
+        return (position % self.width, position // self.width)
     def vertex_to_address(self, vertex):
         return "Sky Street {} Sky Avenue {}".format(
                 *[x+1 for x in vertex[::-1]])
@@ -245,14 +248,14 @@ class WorldMap:
                     self.to_position(destination))
         # Cut out the terminal vertex from the result, keeping only
         # the path and the total weight.
-        return [self.normalize_vertices(result[1]), result[2]]
+        return [self.normalize_vertices(result[2]), result[0]]
 
 # Preconditions:
 # - graph: An instance of the WorldMap class. It is assumed that the
 #   graph here is a simple graph.
-# - source, destination: These are vertices in the graph, and since the
-#   graph is a list of lists, the vertices are numbers-- indexes of the
-#   matrix.
+# - source, destination: Integers. These are vertices in the graph, and
+#   since the graph is a list of lists, the vertices are numbers--
+#   indexes of the matrix.
 # Returns:
 # - If destination is None, then it returns paths from the source to
 #   every possible destination.
@@ -261,11 +264,11 @@ class WorldMap:
 def shortest_path(graph, source, destination=None):
     # Each entry of explored is of the form (weight, vertex, path),
     # where:
-    # - vertex is the terminal vertex in the path.
-    # - path is a list of vertices that specify a path through the
-    #   graph, starting from source and ending in vertex.
-    # - weight is the weight of the path (the sum of the weights of the
+    # - weight: is the weight of the path (the sum of the weights of the
     #   edges in the path).
+    # - vertex: is the terminal vertex in the path.
+    # - path: is a list of vertices that specify a path through the
+    #   graph, starting from source and ending in vertex.
     # - Order of entries is actually important, because frontier is a
     #   priority queue, and it sorts by the first element.
     explored_paths = [(0, source, [source])]
@@ -298,15 +301,16 @@ def shortest_path(graph, source, destination=None):
         explored_vertices.add(best_path[1])
         frontier_set.remove(best_path[1])
         for vertex in graph.neighborhood_of(best_path[1]):
-            if not vertex in explored_vertices:
+            if not (vertex in explored_vertices):
                 path_to_vertex = (
                     best_path[0] + graph.edge(best_path[1], vertex),
                     vertex,
                     [ *best_path[2], vertex ] 
                 )
                 if vertex in frontier_set:
-                    previous_way, =\
+                    previous_way =\
                         [x for x in frontier_queue if x[1] == vertex]
+                    previous_way = previous_way[0]
                     if previous_way[0] > path_to_vertex[0]:
                         frontier_queue.remove(previous_way)
                         frontier_queue.append(path_to_vertex)
@@ -318,14 +322,8 @@ def shortest_path(graph, source, destination=None):
     return explored_paths
 
 # Making this algorithm faster:
-# - Maybe I can put all the possibilities on a priority queue?
-# - The old possibilities don't really go away, and I keep regenerating
-#   them with each iteration.
-# - I also know that I'm exploring paths in nondecreasing order, so if I
-#   ever see a frontier vertex in the neighborhood of another vertex
-#   just discovered, there's no way the path from that vertex to the
-#   frontier vertex is better than the path that I already found
-#   (assuming that this path was found on a previous iteration.
+# - I'm choosing paths in nondecreasing order. I can find better paths
+#   to unexplored vertices later, but not to explored vertices.
 # - Even further, we only put one vertex at a time in the explored set,
 #   and this graph is assumed to be a simple graph. So vertices
 #   shouldn't pop up more than once in a vertex's neighborhood.
@@ -346,8 +344,8 @@ def validate_address_test():
         ( "Sky Street 123 Sky Avenue 456", True ),
     ]
 
-    passed = [x for (x,y) in cases if validate_address(x) == y]
-    failed = [x for (x,y) in cases if validate_address(x) != y]
+    passed = [x for (x,y) in cases if self.validate_address(x) == y]
+    failed = [x for (x,y) in cases if self.validate_address(x) != y]
 
     if len(failed) == 0:
         return True
@@ -393,7 +391,7 @@ def validate_shortest_path():
 # }}} ######################################################
 
 if __name__ == "__main__":
-    Map = WorldMap(30,30)
+    Map = WorldMap(5,5)
     Map.generate_graph()
     print(*Map.graph, sep='\n')
     print(*shortest_path(Map, 0), sep='\n')
