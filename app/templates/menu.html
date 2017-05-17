@@ -10,15 +10,20 @@
 <link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
 <link href="https://fonts.googleapis.com/css?family=Allerta+Stencil" rel="stylesheet">
 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
     <style>
     {#  Using FontAwesome for heart icons #}
      @import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css);
      input[type="text"] {
-       width: 50px;
+       width: 200px;
          background-color: lightcyan;
-
      }
-    p{
+    p,a{
         font-family: "Allerta Stencil";
         font-size: 14px;
         font-style: normal;
@@ -34,11 +39,56 @@
         line-height: 16px;
     }
 
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 450px}
+
+    /* Set gray background color and 100% height */
+    .sidenav {
+      padding-top: 20px;
+      background-color: springgreen;
+      height: 100%;
+    }
+
+    /* Set black background color, white text and some padding */
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+    }
+
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height:auto;}
+    }
+    body{
+        background-color: springgreen;
+    }
     </style>
 {% endblock %}
 
 {% block content %}
-    <ul class="list-inline">
+<img src="static/LogoSample_ByTailorBrands.jpg" height="150" width="150" style="user-select: none; margin-left: 550px;margin-bottom: 30px;">
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
        <li><a href="/">Home</a></li>
        <li><a href="menu">Menu</a></li>
        <li><a href="contact">Contact Us</a></li>
@@ -57,14 +107,16 @@
             {% endif %}
 
             <li><a href="logout">Log Out</a></li>
-        {% else %}
+        {% else%}
+
             <li><a href="signup">Sign up</a></li>
             <li><a href="login">Log in</a></li>
         {% endif %}
-    </ul>
-
-
-
+      </ul>
+    </div>
+  </div>
+</nav>
+{# nav bar ends #}
     {% if doge == 0 or sumitem == 0 %}
         <h1><i class="fa fa-cart-arrow-down" aria-hidden="true"></i> Cart is Empty </h1>
     {% else %}
@@ -101,7 +153,7 @@
            {% if total[loop.index0] == 0 %}
                 {#DON'T RENDER THIS FOOD BECAUSE SUBTOTAL FOR IT IS ZERO  #}
             {% else %}
-                <p>x      ${{ price }}</p>
+                <p>x      ${{ price }}0</p>
             {% endif %}
         {% endfor %}
         </div>
@@ -112,13 +164,13 @@
             {% if total[loop.index0] == 0 %}
                 {#DON'T RENDER THIS FOOD BECAUSE SUBTOTAL FOR IT IS ZERO  #}
             {% else %}
-                <p>Total Price for this Item: ${{ total[loop.index0] }}</p>
+                <p>Total Price for this Item: ${{ total[loop.index0] }}0</p>
             {% endif %}
         {% endfor %}
     </div>
     </div>
     <h1><i class="fa fa-credit-card" aria-hidden="true"></i> Total Price</h1>
-    <h2>${{ sumitem }}</h2>
+    <h2>${{ sumitem }}0</h2>
 {#    <button class="btn btn-lg btn-primary btn-block" type="submit">Checkout</button>#}
         {{ placebutton.hidden_tag() }}
         {{ wtf.form_field(placebutton.submit) }} {# Place Order Button#}
@@ -142,7 +194,7 @@
          <div class="col-md-3" > {#col-md-n is what puts them in columns, n can be 3, 4   #}
 
         <p style="font-size: 20px"><strong>{{ items.itemName }}</strong></p>
-        <p>Price: ${{ items.itemPrice }}</p>
+        <p>Price: ${{ items.itemPrice }}0</p>
         <img src="static/{{ items.itemPict }}" height="200" width="285" style="user-select: none">
         <div style="background-color: #9affcc; border-radius: 8px; margin-top: 5px">
         <p>{{ items.itemDesc }}</p>

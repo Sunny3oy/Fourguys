@@ -10,6 +10,17 @@ Login Employee
 {% endblock %}
 
 {% block content %}
+    <img src="static/LogoSample_ByTailorBrands.jpg" height="150" width="150" style="user-select: none; margin-left: 560px;margin-bottom: 0px;">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div style="background-color: #ef0909">
+    <p style="font-size: 40px">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
     <div class="container">
 
       <form class="form-signin" method="post" action="/loginEmployee">

@@ -24,7 +24,7 @@
          background-color: lightcyan;
 
      }
-    p{
+    p,a{
         font-family: "Allerta Stencil";
         font-size: 14px;
         font-style: normal;
@@ -83,7 +83,6 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">Logo</a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
@@ -92,9 +91,6 @@
         <li><a href="profile">Profile</a></li>
         <li><a href="logout">Log Out</a></li>
       </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-      </ul>
     </div>
   </div>
 </nav>
@@ -102,29 +98,102 @@
 <div class="container-fluid text-center">
   <div class="row content">
     <div class="col-sm-2 sidenav">
+        <img src="static/LogoSample_ByTailorBrands.jpg" height="150" width="150" style="user-select: none">
+        <p>{{ user.firstName }}</p>
+        <br>
       <p><a href="addmoney">Add Money</a></p>
-      <p><a href="#">Change Password</a></p>
+      <p><a href="changepassword">Change Password</a></p>
       <p><a href="changeadd">Change Address</a></p>
-        <p><a href="#">View order History</a></p>
+        <p><a href="viewhistory">View order History</a></p>
+        <p><a href="closeaccount">CLOSE ACCOUNT</a></p>
     </div>
     <div class="col-sm-8 text-left">
       <h1>Account Settings</h1>
+        <h2> Select an option on the left side</h2>
+        <br>
+        <br>
+        <h1>Vip Status</h1>
+        {% if user.statusVIP %}
+            <p>You are a VIP!</p>
+        {% else %}
+            <p>To reach VIP you must spend a total of $500.00 or make 50+ orders</p>
+            <p>VIP members get 10% discount on all orders!</p>
+            <p>Total money spent: ${{ totalprice }}0/$500.00</p>
+            <p>Current orders placed: {{ numorders }}/50</p>
+        {% endif %}
+        {% if flagprice or flagorder%}
+            {% if user.statusVIP == 0 %}
+            <p>You have reach the requirements for VIP Status!</p>
+            <p>The manager will promote you when he have time!</p>
+                {% endif %}
+        {% endif %}
+        <br>
+        <br>
+        <br>
+        <h1>Your warnings!</h1>
+        <p>If you troll or provide unreasonable feedbacks, you will be warned!</p>
+        <p>Your total warnings: {{user.numWarning}} </p>
+        <br>
+        <br>
+        <form method="post" action="/profile">
+            {% for order in displayOrders %}
+
+                <p style="font-size: 25px">Order Number:{{ order[0] }}</p>
+                <hr>
+                {% for food in displayfood %}
+                {% if order[0] == food[3] %}
+                <div class="col-md-4">
+                <p>{{ food[0] }}</p>
+                <p>Price:${{ food[1] }}</p>
+                    {% for number in numbers %}
+                    {% if number < food[2] %}
+                    <i class="fa fa-heart" style="color: #ff9acd" aria-hidden="true"></i>
+                    {% else %}
+                    <i class="fa fa-heart-o" style="color: #ff9acd" aria-hidden="true"></i>
+                    {% endif %}
+                    {% endfor %}
+                <p>Rating: {{ food[2] }}</p>
+                <p>Ordered Quantity:{{ food[4] }}</p>
+                 <img src="static/{{ food[5] }}" height="100" width="150" style="user-select: none">
+                 {{ food[6].hidden_tag() }}
+                {{ wtf.form_field(food[6].rate) }}
+                {{ wtf.form_field(food[6].submit) }}
+                <p></p>
+                </div>
+{#                <div class="col-md-4"><p>LOOL</p></div>#}
+                {% endif %}
+                {% endfor %}
+                <br>
+
+
+                <div>
+
+                {{ order[1].hidden_tag() }}
+                {{ wtf.form_field(order[1].comp) }}
+                {{ wtf.form_field(order[1].isGood) }}
+                {{ wtf.form_field(order[1].employee) }}
+                {{ wtf.form_field(order[1].submit) }}
+{#                 <div class="col-md-4">#}
+{#                <div class="row" style="float: none">#}
+                </div>
+
+                <br>
+                <br>
+            {% endfor %}
+
+    </form>
 {#      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>#}
     </div>
 
 
 
 {##############################}
-
-
 {##############################}
 
   </div>
 </div>
 
 
-    <form method="post" action="/chefPage">
-    </form>
     <form method="post" action="/chefPage">
     </form>
 {% endblock %}

@@ -24,7 +24,7 @@
          background-color: lightcyan;
 
      }
-    p{
+    p,a{
         font-family: "Allerta Stencil";
         font-size: 14px;
         font-style: normal;
@@ -87,10 +87,10 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Home</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Projects</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="menu">Menu</a></li>
+        <li><a href="contact">Contact</a></li>
+        <li><a href="logout">LogOut</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
@@ -102,18 +102,19 @@
 <div class="container-fluid text-center">
   <div class="row content">
     <div class="col-sm-2 sidenav">
+      <img src="static/LogoSample_ByTailorBrands.jpg" height="150" width="150" style="user-select: none">
+        <br>
       <p><a href="#">Manager</a></p>
-      <p><a href="#">Complains or Compliments</a></p>
-      <p><a href="#">Accept of Reject Button for Each</a></p>
+
       <form method="post" action="/managerPage">
       {{ managerForm.hidden_tag() }}
       {{ wtf.form_field(managerForm.hire) }}
-      {{ wtf.form_field(managerForm.warning) }}
+          <br>
       </form>
     </div>
     <div class="col-sm-8 text-left" style="width: 752px">
 
-      <h1>Welcome</h1>
+      <h1>Manager Notifications</h1>
 
        <form method="post" action="/managerPage">
 {#       {% for item in menu %}#}
@@ -123,15 +124,103 @@
        </form>
 {#      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>#}
       <hr>
-      <h3>Test</h3>
+      <h3>Check Compliments and Complaints</h3>
       <form method="post" action="/managerPage">
-      {{ managerForm.hidden_tag() }}
-      {{ wtf.form_field(managerForm.hire) }}
-      {{ wtf.form_field(managerForm.fire) }}
-      {{ wtf.form_field(managerForm.promoteE) }}
-      {{ wtf.form_field(managerForm.demoteE) }}
-      {{ wtf.form_field(managerForm.promoteC) }}
-      {{ wtf.form_field(managerForm.demoteC) }}
+          {% for comp in showCom  %}
+           {% if comp[0] == 0 %}
+               <p>Complaint</p>
+           {% else %}
+                <p>Compliment</p>
+            {% endif %}
+           <p>Order: {{ comp[1] }}</p>
+           <p>{{ comp[2] }}</p>
+           <p>{{ comp[3] }}</p>
+           {{ comp[4].hidden_tag() }}
+           {{ wtf.form_field(comp[4].accept) }}
+           {{ wtf.form_field(comp[4].warning) }}
+              <hr>
+{#           <p>==============================</p>#}
+        {% endfor %}
+      </form>
+
+
+
+      <form method="post" action="/managerPage">
+      <h3>Demoted Employees To Fire</h3>
+          {% for dem in demotions  %}
+           {% if dem[0] == 2 %}
+               <p>{{ dem[1] }}</p>
+               <p>This employee has {{ dem[0] }} demotions and MUST be Fired!</p>
+               <hr>
+{#               <p>==============================</p>#}
+            {% endif %}
+{#           {{ comp[4].hidden_tag() }}#}
+{#           {{ wtf.form_field(comp[4].accept) }}#}
+{#           {{ wtf.form_field(comp[4].warning) }}#}
+        {% endfor %}
+      </form>
+
+    <form method="post" action="/managerPage">
+      <h3>Grant VIP to Customer</h3>
+          {% for vip in vipNotification  %}
+               <p>{{ vip[1] }} has {{ vip[2] }} orders and ${{ vip[3] }} spent.</p>
+              <p>Customer MUST be granted VIP</p>
+              <hr>
+{#               <p>==============================</p>#}
+{#           {{ comp[4].hidden_tag() }}#}
+{#           {{ wtf.form_field(comp[4].accept) }}#}
+{#           {{ wtf.form_field(comp[4].warning) }}#}
+        {% endfor %}
+      </form>
+
+    <form method="post" action="/managerPage">
+      <h3>Drop VIP Status for Customer</h3>
+          {% for drop in dropVipNotification  %}
+               <p>{{ drop }} is to be dropped from VIP.</p>
+              <hr>
+{#               <p>==============================</p>#}
+{#           {{ comp[4].hidden_tag() }}#}
+{#           {{ wtf.form_field(comp[4].accept) }}#}
+{#           {{ wtf.form_field(comp[4].warning) }}#}
+        {% endfor %}
+      </form>
+
+    <form method="post" action="/managerPage">
+      <h3>Customers With Three Warnings</h3>
+          {% for war in deregisterNotification  %}
+               <p>{{ war }} has three warnings. To be de-registered </p>
+              <hr>
+{#               <p>==============================</p>#}
+{#           {{ comp[4].hidden_tag() }}#}
+{#           {{ wtf.form_field(comp[4].accept) }}#}
+{#           {{ wtf.form_field(comp[4].warning) }}#}
+        {% endfor %}
+      </form>
+
+    <form method="post" action="/managerPage">
+      <h3>New Customer Account Requests</h3>
+          {% for newC in newCustomers  %}
+               <p>{{ newC[1] }} wants to create a new account.</p>
+              {{ newC[2].hidden_tag() }}
+              {{ wtf.form_field(newC[2].accept) }}
+              {{ wtf.form_field(newC[2].reject) }}
+              <hr>
+{#               <p>==============================</p>#}
+
+        {% endfor %}
+      </form>
+
+
+    <form method="post" action="/managerPage">
+      <h3>Customer Close Account Requests</h3>
+          {% for req in closeRequests  %}
+               <p>{{ req }} requests to close account.</p>
+              <hr>
+{#               <p>==============================</p>#}
+{#           {{ comp[4].hidden_tag() }}#}
+{#           {{ wtf.form_field(comp[4].accept) }}#}
+{#           {{ wtf.form_field(comp[4].warning) }}#}
+        {% endfor %}
       </form>
     </div>
 
@@ -144,12 +233,17 @@
       {{ managerForm.hidden_tag() }}
       {{ wtf.form_field(managerForm.employeeDropList) }}
       {{ wtf.form_field(managerForm.promoteE) }}
+        <br>
       {{ wtf.form_field(managerForm.demoteE) }}
+        <br>
       {{ wtf.form_field(managerForm.fire) }}
-
+        <br>
+        <br>
       {{ wtf.form_field(managerForm.customerDropList) }}
       {{ wtf.form_field(managerForm.promoteC) }}
+        <br>
       {{ wtf.form_field(managerForm.demoteC) }}
+        <br>
       {{ wtf.form_field(managerForm.close) }}
     </form>
     </div>
@@ -159,13 +253,4 @@
   </div>
 </div>
 
-<footer class="container-fluid text-center">
-  <p>Footer Text</p>
-</footer>
-
-
-    <form method="post" action="/chefPage">
-    </form>
-    <form method="post" action="/chefPage">
-    </form>
 {% endblock %}

@@ -5,3 +5,4 @@ orderID, menuID, itemID, itemQty, itemRating, itemComments
 2, 2, 3, 10, 4, "This beverage is the answer to quenching your thirst while simultaneously lubricating" your esophagus
 2, 1, 1, 5, 5,  "These cheeseburgers are so good, my cholesterol level has never been lower"
 3, 1, 2, 1, 4, "The doge is kind of too dry; need to pair this with merlot"
+4, 1, 5, 6, 1, "Enter comment"

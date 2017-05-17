@@ -4,6 +4,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy import func, desc
+from .forms import *
 db = SQLAlchemy(app)
 
 
@@ -19,9 +20,10 @@ class Customer(UserMixin, db.Model):
     zipcode = db.Column(db.Integer)
     email = db.Column(db.String(30), unique=True)
     contactNum = db.Column(db.Integer)
-    acctBal = db.Column(db.REAL)
+    acctBal = db.Column(db.REAL,default=0)
     numWarning = db.Column(db.Integer, default=0)
     statusVIP = db.Column(db.Boolean, default=0)
+    closerequest = db.Column(db.Boolean)
     activated = db.Column(db.Boolean, default=0)
     password = db.Column(db.Text)
 
@@ -53,6 +55,7 @@ class Menu(db.Model):
     chefID = db.Column(db.Integer, db.ForeignKey('employees.id'))
     menuName = db.Column(db.String(50))
     menuDesc = db.Column(db.Text)
+    activated = db.Column(db.Boolean, default=True)
 
     emplRel = db.relationship('Employee', backref='menuRel')
 
@@ -156,7 +159,6 @@ class OrderDetail(db.Model):
     def __repr__(self):
         return '<orderID: %s, menuID: %s, itemID: %s, qty: %s>' % (self.orderID, self.menuID, self.itemID, self.itemQty)
 
-
 class Employee(UserMixin, db.Model):
     __tablename__ = 'employees'
     id = db.Column(db.Integer, primary_key=True)
@@ -214,7 +216,6 @@ class SalaryBase(db.Model):
     def __repr__(self):
         return '<salaryID: %s, hour base: %s>' % (self.salaryID, self.hourBase)
 
-
 class Complaint(db.Model):
     __tablename__ = 'complaints'
     complaintID = db.Column(db.Integer, primary_key=True)
@@ -222,7 +223,7 @@ class Complaint(db.Model):
     emplID = db.Column(db.Integer, db.ForeignKey('employees.id'))
     orderID = db.Column(db.Integer, db.ForeignKey('orders.orderID'))
     comment = db.Column(db.Text)
-    isGood = db.Column(db.Boolean)
+    isGood = db.Column(db.Boolean,default=True)
     accepted = db.Column(db.Boolean)
 
     custRel = db.relationship(Customer, backref='complaintRel')
@@ -402,6 +403,7 @@ def get_all_new_customers():
 def deactivate_customer_account(username):
     stmt = Customer.query.filter(Customer.username == username).first()
     stmt.activated = False
+    stmt.closerequest = True
     db.session.add(stmt)
     db.session.commit()
 
@@ -413,6 +415,16 @@ def activate_customer_account(username):
     db.session.add(stmt)
     db.session.commit()
 
+# reject new customer
+def reject_customer_account(username):
+    stmt = Customer.query.filter(Customer.username == username).first()
+    stmt.closerequeset = True
+    db.session.add(stmt)
+    db.session.commit()
+
+#gets all complaints
+def get_complaints():
+    return Complaint.query.all()
 
 # promote a customer to VIP Status
 def promote_to_VIP(username):
@@ -438,7 +450,7 @@ def total_money_spent(username):
         .scalar()
     return 0 if stmt is None else round(stmt)
 
-
+  
 def get_number_of_orders(username):
     stmt = db.session.query(func.count(Order.username))\
         .filter(Order.username == username).scalar()
@@ -453,7 +465,8 @@ def get_all_employees():
 # increase the pay grade of the employee
 def promote_employee(emplID):
     stmt = Employee.query.filter(Employee.id == emplID).first()
-    stmt.payGrade += 1
+    if not stmt.payGrade == 8:
+        stmt.payGrade += 1
     db.session.add(stmt)
     db.session.commit()
 
@@ -463,8 +476,9 @@ def promote_employee(emplID):
 def demote_employee(emplID):
     stmt = Employee.query.filter(Employee.id == emplID).first()
     if stmt.numDemotion in range(0, 2):
-        stmt.payGrade -= 1
-        stmt.numDemotion += 1
+        if not stmt.payGrade == 1:
+            stmt.payGrade -= 1
+            stmt.numDemotion += 1
     db.session.add(stmt)
     db.session.commit()
 
@@ -473,10 +487,16 @@ def demote_employee(emplID):
 def fire_employee(emplID):
     stmt = Employee.query.filter(Employee.id == emplID).first()
     stmt.activated = False
+    # Now if the employee was a chef delete his/her menu
+    if stmt.emplType == 1:
+        menu = get_all_menus_by_chef(emplID)
+        menu[0].activated = False
+        print("Employee fired and menu deleted")
     db.session.add(stmt)
+    db.session.add(menu[0])
     db.session.commit()
 
-    
+
 # calculate the average rating for all
 # food items cooked by a chef
 def get_total_rating(chefID):
@@ -512,7 +532,7 @@ def accept_complaint(complaintID):
     empl = Employee.query.filter(Employee.id == complaint_stmt.emplID).first()
     complaint_stmt.accepted = True
     if complaint_stmt.isGood:
-        if empl.numComplaint in range(0, 3):
+        if empl.numComplaint in range(1, 3):
             empl.numComplaint -= 1
     else:
         if empl.numComplaint in range(0, 3):
@@ -531,11 +551,12 @@ def decline_complaint(complaintID):
         db.session.add(complaint_stmt)
     else:
         if cust.numWarning in range(0, 3):
+            print("WARNINGS:",cust.numWarning)
             cust.numWarning += 1
             db.session.add_all([complaint_stmt, cust])
     db.session.commit()
 
-    
+
 #Checks if fooditem exists in a menu. True if it does. False otherwise.
 def is_food_item_exist(menuID, itemID):
     result = MenuItem.query.filter(MenuItem.itemID == itemID, MenuItem.menuID == menuID).all()
@@ -571,4 +592,99 @@ def get_customers():
     customers = Customer.query.all()
     return customers
 
+
+#Get ACTIVATED employeed pairs (id,employee)
+def get_pair_id_employee():
+    employeeList = []
+    employees = get_employees()
+    for employee in employees:
+        if not employee.emplType == 0 and (employee.activated == True):  # Managers (type 0) are not subject to promotions or demotions
+            if employee.emplType == 1:
+                employeeType = "Chef: "
+            else:
+                employeeType = "Delv: "
+            employeeList.append((employee.id, employeeType + employee.firstName + ' ' + employee.lastName + ' $'+ str(get_salary(employee.payGrade).hourBase)))
+    return employeeList
+
+#Returns salary based on emplyee payGrade
+def get_salary(payGrade):
+    return SalaryBase.query.filter(SalaryBase.salaryID==payGrade).first()
+
+#Gets pairs (username,customer name and status)
+def get_pair_id_customer():
+    customersList = []
+    customers = get_customers()
+    for customer in customers:
+        if customer.activated:
+            vip = ""
+            if customer.statusVIP:
+                vip = "VIP: "
+        # Do not forget to put a condition here that checks whether they are MVP or NOT
+            customersList.append((customer.username,vip + customer.firstName + ' ' + customer.lastName))
+    return customersList
+
+#Returns pair (number of demonitions, employee name)
+def get_pair_demotion_emplName():
+    pairs = []
+    employees = get_employees()
+    for employee in employees:
+        if employee.activated: #Only working employees are subject to demonitions
+            pairs.append((employee.numDemotion,employee.firstName + " " + employee.lastName))
+    return pairs
+
+#Returns pair (close request, customer name)
+def get_close_requests():
+    pairs = []
+    customers = get_customers()
+    for customer in customers:
+        print(customer.closerequest)
+        if customer.activated and customer.closerequest:
+            pairs.append(customer.firstName + customer.lastName)
+    return pairs
+
+def get_new_customers_notifications():
+    pairs = []
+    customers = get_customers()
+    for customer in customers:
+        if (not customer.activated) and (not customer.closerequest):
+            #Create accept and reject buttons
+            buttons = accept_reject(prefix=str(customer.username))
+            pairs.append((customer.username, customer.firstName + ' ' + customer.lastName, buttons))
+    return pairs
+
+def get_number_of_orders(username):
+    stmt = db.session.query(func.count(Order.username))\
+        .filter(Order.username == username).scalar()
+    return 0 if stmt is None else stmt
+
+#Get the VIP notifications based orders
+def get_VIP_notifications():
+    grantVip = []
+    customers = get_customers()
+    for customer in customers:
+        orders = get_number_of_orders(customer.username)
+        total = total_money_spent(customer.username)
+        if (orders >= 50) or (total >= 500):
+            if not customer.statusVIP and customer.activated:
+                if not customer.numWarning > 1:
+                    grantVip.append((customer.username, customer.firstName + ' ' + customer.lastName,orders, total,  ))
+    return grantVip
+
+#Gets list names of customers that must be deregistered
+def get_deregister_warnings_customers():
+    close = []
+    customers = get_customers()
+    for customer in customers:
+        if customer.activated and (customer.numWarning == 3):
+            close.append(customer.firstName + ' ' + customer.lastName)
+    return close
+
+#Gets list of VIP's who are to be dropped from VIP
+def drop_customer_VIP_list():
+    drop = []
+    customers = get_customers()
+    for customer in customers:
+        if customer.activated and (customer.numWarning == 2) and customer.statusVIP:
+            drop.append(customer.firstName + ' ' + customer.lastName)
+    return drop
 # }}} ######################################################
