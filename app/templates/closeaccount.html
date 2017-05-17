@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-    Add money
+    Close Account
 {% endblock %}
 
 {% block styles %}
@@ -24,7 +24,7 @@
          background-color: lightcyan;
 
      }
-    p,a{
+    p{
         font-family: "Allerta Stencil";
         font-size: 14px;
         font-style: normal;
@@ -91,6 +91,7 @@
         <li><a href="profile">Profile</a></li>
         <li><a href="logout">Log Out</a></li>
       </ul>
+
     </div>
   </div>
 </nav>
@@ -98,9 +99,7 @@
 <div class="container-fluid text-center">
   <div class="row content">
     <div class="col-sm-2 sidenav">
-       <img src="static/LogoSample_ByTailorBrands.jpg" height="150" width="150" style="user-select: none">
-        <br>
-     <p>{{ user.firstName }}</p>
+        <p>{{ user.firstName }}</p>
       <p><a href="addmoney">Add Money</a></p>
       <p><a href="changepassword">Change Password</a></p>
       <p><a href="changeadd">Change Address</a></p>
@@ -108,12 +107,15 @@
         <p><a href="closeaccount">CLOSE ACCOUNT</a></p>
     </div>
     <div class="col-sm-8 text-left">
-        <h1> Adding Money </h1>
-    <h1> Your account have {{ user.acctBal }}! </h1>
-      <form class="form-signin" method="post" action="/addmoney">
-      {{ form.hidden_tag() }}
-      {{ wtf.form_field(form.addmoney) }}
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Add Amount</button>
+        <h1> Close your Account </h1>
+        <br>
+        <br>
+        <h1> WARNING: Closing account will send a request
+            <br><br>to the manager</h1>
+        <h1>You WILL NOT be able to login once you put in
+            <br><br>the request.</h1>
+      <form class="form-signin" method="post" action="/terminate">
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Close your account</button>
       </form>
     </div>
 

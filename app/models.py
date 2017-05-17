@@ -626,3 +626,4 @@ def drop_customer_VIP_list():
         if customer.activated and (customer.numWarning == 2) and customer.statusVIP:
             drop.append(customer.firstName + ' ' + customer.lastName)
     return drop
+  

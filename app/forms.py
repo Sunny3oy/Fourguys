@@ -18,6 +18,11 @@ class accountsetting(FlaskForm):
 class changeaddress(FlaskForm):
     changeCurAdd = StringField('Address', validators=[InputRequired()])
 
+class changepass(FlaskForm):
+    oldpassword = PasswordField('Old Password', validators=[InputRequired(), Length(min=8, max=80)])
+    changeuserpass = PasswordField('New Password', validators=[InputRequired(), Length(min=8, max=80)])
+    confirm = PasswordField('Confirm New Password', validators=[InputRequired(), Length(min=8, max=80), ])
+
 class login1(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(max=50)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
@@ -30,6 +35,12 @@ class loginEmployee(FlaskForm):
 
 class menu1(FlaskForm):
     qty = IntegerField('qty', validators=[InputRequired()], default=0)
+
+class complaint(FlaskForm):
+    comp = StringField('Complaint or Compliment', validators=[InputRequired()])
+    isGood = BooleanField('Is Good?')
+    employee = SelectField("Choose Employee",choices=[])
+    submit = SubmitField("Submit Order Complaint")
 
 class PlaceButton(FlaskForm):
     submit = SubmitField("Place Order")

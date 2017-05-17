@@ -328,6 +328,22 @@ def contact():
 @app.route('/profile',methods=['GET', 'POST'])
 @login_required('CUSTOMER')
 def user_profile():
+    orders = []
+    orders = get_customer_orders(current_user.username)
+    numorders = len(orders)
+    orderprice = []
+    for items in orders:
+        price = items.totalPrice
+        orderprice.append(price)
+    totalprice = sum(orderprice)
+    if numorders >= 50:
+        flagorder = 1
+    else:
+        flagorder = 0
+    if totalprice >= 500:
+        flagprice = 1
+    else:
+        flagprice = 0
     ####
     details = []
     displayOrders = []
@@ -362,10 +378,8 @@ def user_profile():
             db.session.add(new_complaint)
             db.session.commit()
             return redirect(url_for("user_profile"))
-
-
     ####
-    return render_template("profile.html",numbers=numbers, user = current_user, displayOrders=displayOrders, displayfood=displayfood)
+    return render_template("profile.html",numbers=numbers, user = current_user, displayOrders=displayOrders, displayfood=displayfood, numorders=numorders, totalprice = totalprice,flagorder=flagorder,flagprice=flagprice)
 
   
 @app.route('/managerPage',methods=['GET', 'POST'])
@@ -627,6 +641,72 @@ def changeadd():
         return render_template("changeadd.html",form = form, user = current_user)
     return render_template("changeadd.html",form = form, user = current_user)
 
+@app.route('/changepassword', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def changepassword():
+    form = changepass()
+    check = 0
+    if form.validate_on_submit():
+            if (current_user.password == form.oldpassword.data) and form.changeuserpass.data == form.confirm.data :
+                current_user.password = form.confirm.data
+                db.session.commit()
+                check = 1
+                return render_template("changepassword.html",form = form, user = current_user,check=check)
+    return render_template("changepassword.html",form = form, user = current_user,check = check)
+
+@app.route('/viewhistory', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def vhistory():
+    details = []
+    displayOrders = []
+    numbers = [0, 1, 2, 3, 4]
+    ordersmade = get_customer_orders(current_user.username)
+    for order in ordersmade:
+        order_detail = get_order_details(order.orderID)
+        complaintOrder = complaint(prefix=order.username + str(order.orderID))
+        complaintOrder.employee.choices = get_pair_id_employee()
+        displayOrders.append((order.orderID, complaintOrder, current_user.username))
+        details.append(order_detail)
+
+    displayfood = []
+    for detail in details:
+        for item in detail:
+            food = FoodItem.query.filter(FoodItem.itemID == item.itemID).first()
+            displayfood.append(
+                (food.itemName, food.itemPrice, food.itemRating, item.orderID, item.itemQty, food.itemPict))
+
+    for form in displayOrders:
+        if form[1].submit.data:
+            print("IM HERE SUBMIT")
+            Complaint.query.filter_by(complaintID=form[0]).delete()  # Remove if existing
+            db.session.commit()
+            # Now replace complaint or create new one
+            new_complaint = Complaint(orderID=form[0],
+                                      username=form[2],
+                                      emplID=form[1].employee.data,
+                                      comment=form[1].comp.data,
+                                      isGood=form[1].isGood.data)
+            print("Complaint Made")
+            db.session.add(new_complaint)
+            db.session.commit()
+            return redirect(url_for("user_profile"))
+    check = 0
+    if len(displayfood) == 0:
+        check = 1
+    return render_template("viewhistory.html", numbers=numbers, user=current_user, displayOrders=displayOrders,
+                           displayfood=displayfood,check=check)
+
+@app.route('/closeaccount', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def close():
+    return render_template("closeaccount.html", user = current_user)
+
+@app.route('/terminate', methods=['GET', 'POST'])
+@login_required('CUSTOMER')
+def term():
+    current_user.closerequest = 1
+    db.session.commit()
+    return redirect("logout")
 
 @app.route('/argh', methods=['GET'])
 @login_required('CUSTOMER')
