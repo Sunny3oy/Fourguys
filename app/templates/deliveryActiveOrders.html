@@ -83,6 +83,12 @@
 
 {% block content %}
 
+		{% macro route_button(order_id) %}
+		<a href={{url_for('specific_delivery_page', order_id=order_id)}}
+					class="btn btn-default">Get Route to Order?</a>
+		{% endmacro %}
+
+
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
@@ -124,6 +130,7 @@
 									<td><b>Customer Name</b></td>
 									<td><b>Customer Address</b></td>
 									<td><b>Order Date</b></td>
+									<td><b>Change Map</b></td>
 							</tr>
 							{% for order in orders %}
                 <tr>
@@ -134,6 +141,7 @@
 										</td>
                     <td> {{ order.custRel.address }} </td>
                     <td> {{ order.orderDate }} </td>
+                    <td> {{ route_button(order.orderID) }} </td>
                 </tr>
                 {% endfor %}
             </table>

@@ -405,63 +405,16 @@ def create_delivery_page(currentOrder=None):
             customer_name=customer_name
             )
 
-@app.route('/deliveryPage', methods=['GET', 'POST'])
+@app.route('/deliveryPage')
 @login_required('DELIVERY')
 def delivery_page():
+    return create_delivery_page()
 
-    # Turn all python iterators into lists so that javascript can use
-    # them. Assumes that lst is an iterator.
-    # TODO: Fix this.
-    def listify(lst):
-        this_list = list(lst)
-        new_list = []
-        for x in this_list:
-            if type(x) == type(()):
-                new_list.append(listify(x))
-            else:
-                new_list.append(x)
-        return new_list
+@app.route('/deliveryPage/<order_id>')
+@login_required('DELIVERY')
+def specific_delivery_page(order_id):
+    return create_delivery_page(order_id)
 
-    map_width = delivery.Map.width
-    map_height = delivery.Map.height
-    # convert the graph to a format that javascript can understand.
-    compatible_map =\
-        list(map( lambda lst: ["null" if x == None else x for x in lst],
-            delivery.Map.graph))
-
-
-    currentOrder = get_first_order_by_delivery_person(current_user.id)
-    print("Current Order:", currentOrder)
-    if currentOrder == None:
-        return render_template("deliveryPage.html",
-                world_map=compatible_map,
-                map_width=map_width,
-                map_height=map_height,
-                restaurantLocation=delivery.Map.restaurantLocation,
-                customer_address=None,
-                route=None,
-                route_weight=None,
-                currentOrder=None
-                )
-
-    customer_address = currentOrder.custRel.address
-    customer_name = "{} {}".format(\
-            currentOrder.custRel.firstName,
-            currentOrder.custRel.lastName)
-
-    route, route_weight = delivery.shortest_route(customer_address)
-
-    route = [list(x) for x in route]
-    return render_template("deliveryPage.html",
-            world_map=compatible_map,
-            map_width=map_width,
-            map_height=map_height,
-            restaurantLocation=delivery.Map.restaurantLocation,
-            route=route,
-            route_weight=route_weight,
-            customer_address=customer_address,
-            customer_name=customer_name
-            )
 
 @app.route('/deliveryPage/orderHistory')
 def deliveryOrderHistory():
