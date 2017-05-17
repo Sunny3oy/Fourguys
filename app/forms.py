@@ -90,7 +90,11 @@ class accept_reject(FlaskForm):
     reject = SubmitField("Reject")
 
 class complaint(FlaskForm):
-    comp = StringField('Complaint or Compliment', validators=[InputRequired()])
+    comp = StringField('Complaint or Compliment')
     isGood = BooleanField('Is Good?')
     employee = SelectField("Choose Employee",choices=[])
     submit = SubmitField("Submit Order Complaint")
+
+class giveRating(FlaskForm):
+    rate = SelectField("Your Rate",choices=[(1,1),(2,2),(3,3),(4,4),(5,5)])
+    submit = SubmitField("Rate")

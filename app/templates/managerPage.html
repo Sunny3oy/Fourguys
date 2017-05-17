@@ -132,7 +132,7 @@
            {% else %}
                 <p>Compliment</p>
             {% endif %}
-           <p>{{ comp[1] }}</p>
+           <p>Order: {{ comp[1] }}</p>
            <p>{{ comp[2] }}</p>
            <p>{{ comp[3] }}</p>
            {{ comp[4].hidden_tag() }}
@@ -172,6 +172,31 @@
 {#           {{ wtf.form_field(comp[4].warning) }}#}
         {% endfor %}
       </form>
+
+    <form method="post" action="/managerPage">
+      <h3>Drop VIP Status for Customer</h3>
+          {% for drop in dropVipNotification  %}
+               <p>{{ drop }} is to be dropped from VIP.</p>
+              <hr>
+{#               <p>==============================</p>#}
+{#           {{ comp[4].hidden_tag() }}#}
+{#           {{ wtf.form_field(comp[4].accept) }}#}
+{#           {{ wtf.form_field(comp[4].warning) }}#}
+        {% endfor %}
+      </form>
+
+    <form method="post" action="/managerPage">
+      <h3>Customers With Three Warnings</h3>
+          {% for war in deregisterNotification  %}
+               <p>{{ war }} has three warnings. To be de-registered </p>
+              <hr>
+{#               <p>==============================</p>#}
+{#           {{ comp[4].hidden_tag() }}#}
+{#           {{ wtf.form_field(comp[4].accept) }}#}
+{#           {{ wtf.form_field(comp[4].warning) }}#}
+        {% endfor %}
+      </form>
+
     <form method="post" action="/managerPage">
       <h3>New Customer Account Requests</h3>
           {% for newC in newCustomers  %}
@@ -228,13 +253,4 @@
   </div>
 </div>
 
-<footer class="container-fluid text-center">
-  <p>Footer Text</p>
-</footer>
-
-
-    <form method="post" action="/chefPage">
-    </form>
-    <form method="post" action="/chefPage">
-    </form>
 {% endblock %}

@@ -133,6 +133,9 @@
                 <p>Rating: {{ food[2] }}</p>
                 <p>Ordered Quantity:{{ food[4] }}</p>
                  <img src="static/{{ food[5] }}" height="100" width="150" style="user-select: none">
+                 {{ food[6].hidden_tag() }}
+                {{ wtf.form_field(food[6].rate) }}
+                {{ wtf.form_field(food[6].submit) }}
                 <p></p>
                 </div>
 {#                <div class="col-md-4"><p>LOOL</p></div>#}
@@ -141,14 +144,15 @@
                 <br>
 
 
-                <div style="display: " >
-{#                <div class="row" style="float: none">#}
+                <div>
+
                 {{ order[1].hidden_tag() }}
                 {{ wtf.form_field(order[1].comp) }}
                 {{ wtf.form_field(order[1].isGood) }}
                 {{ wtf.form_field(order[1].employee) }}
                 {{ wtf.form_field(order[1].submit) }}
-{#                \</div>#}
+{#                 <div class="col-md-4">#}
+{#                <div class="row" style="float: none">#}
                 </div>
 
                 <br>

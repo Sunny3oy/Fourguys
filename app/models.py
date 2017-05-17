@@ -349,6 +349,7 @@ def get_all_new_customers():
 def deactivate_customer_account(username):
     stmt = Customer.query.filter(Customer.username == username).first()
     stmt.activated = False
+    stmt.closerequest = True
     db.session.add(stmt)
     db.session.commit()
 
@@ -490,6 +491,7 @@ def decline_complaint(complaintID):
         db.session.add(complaint_stmt)
     else:
         if cust.numWarning in range(0, 3):
+            print("WARNINGS:",cust.numWarning)
             cust.numWarning += 1
             db.session.add_all([complaint_stmt, cust])
     db.session.commit()
@@ -602,6 +604,25 @@ def get_VIP_notifications():
         orders = get_number_of_orders(customer.username)
         total = total_money_spent(customer.username)
         if (orders >= 50) or (total >= 500):
-            if not customer.statusVIP:
-                grantVip.append((customer.username, customer.firstName + ' ' + customer.lastName,orders, total,  ))
+            if not customer.statusVIP and customer.activated:
+                if not customer.numWarning > 1:
+                    grantVip.append((customer.username, customer.firstName + ' ' + customer.lastName,orders, total,  ))
     return grantVip
+
+#Gets list names of customers that must be deregistered
+def get_deregister_warnings_customers():
+    close = []
+    customers = get_customers()
+    for customer in customers:
+        if customer.activated and (customer.numWarning == 3):
+            close.append(customer.firstName + ' ' + customer.lastName)
+    return close
+
+#Gets list of VIP's who are to be dropped from VIP
+def drop_customer_VIP_list():
+    drop = []
+    customers = get_customers()
+    for customer in customers:
+        if customer.activated and (customer.numWarning == 2) and customer.statusVIP:
+            drop.append(customer.firstName + ' ' + customer.lastName)
+    return drop

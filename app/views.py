@@ -212,28 +212,35 @@ def checkout():
     # Otherwise, process the order.
 
     # If the checkout menu is refreshed, the user will be redirected to menu page
-    diffmessg = None
     cartTotal = session.get('ProductTotal')
-
+    custaccbal = current_user.acctBal
+    vip_price = 0
     if cartTotal == 0:
+
         return '<p>You have not selected anything, go back to <a href="menu">menu</a>!!!<p>'
     else:
-        difference = cartTotal - current_user.acctBal
         if session.get('orderMade'):
             return redirect(url_for('menu'))
         else:
-            if cartTotal > current_user.acctBal:
+            if cartTotal > custaccbal:
                 message = 'Seems like you need a new job.'
             else:
-                message = 'Good to go!'
-                diffmessg = "Difference " + str(current_user.acctBal) + " - " + str(cartTotal) + " = " + str(difference)
-                current_user.acctBal = current_user.acctBal - cartTotal
-                db.session.add(current_user)
-                db.session.commit()
+                vip = current_user.statusVIP
+                if vip:
+                    message = "You are VIP. 10% Discount was applied"
+                    vip_price = cartTotal*.90
+                    current_user.acctBal = current_user.acctBal - vip_price
+                    custaccbal = current_user.acctBal
+                    db.session.commit()
+                else:
+                    message = "You are a regular customer. Get VIP status to get 10% discount!"
+                    current_user.acctBal = current_user.acctBal - cartTotal
+                    custaccbal = current_user.acctBal
+                    db.session.commit()
 
                 #Process Order, meaning create Order
                 new_order = Order(username=current_user.username,
-                                  delivererID=1008,
+                                  delivererID=1008, #ICHWAN PUT YOUR RANDOM DELIVERY GUYS FUNCTION
                                     totalPrice=session.get('ProductTotal'),
                                     isDelivered=False)
                 db.session.add(new_order)
@@ -258,7 +265,7 @@ def checkout():
 
                 print("IVE MADE IT!")
                 session['orderMade'] = True
-    return render_template("checkout.html", total=cartTotal, newbalance=current_user.acctBal, message=message, diffmessg=diffmessg)
+    return render_template("checkout.html", user = current_user.username, total=cartTotal,custaccbal=custaccbal , message=message,vip=vip, vip_price=vip_price)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -337,7 +344,8 @@ def user_profile():
     for detail in details:
         for item in detail:
             food = FoodItem.query.filter(FoodItem.itemID == item.itemID).first()
-            displayfood.append((food.itemName,food.itemPrice,food.itemRating,item.orderID,item.itemQty,food.itemPict))
+            rateForm = giveRating(prefix=str(food.itemName)+str(item.orderID))
+            displayfood.append((food.itemName,food.itemPrice,food.itemRating,item.orderID,item.itemQty,food.itemPict,rateForm))
 
     for form in displayOrders:
         if form[1].submit.data:
@@ -368,6 +376,8 @@ def manager_page():
     closeRequests = get_close_requests()
     newCustomers = get_new_customers_notifications()
     vipNotification = get_VIP_notifications()
+    dropVipNotification = drop_customer_VIP_list()
+    deregisterNotification = get_deregister_warnings_customers()
     # This function inputs the items of a menu and a keyword.
     # Creates the number of forms neccesary for the specific menu list using the keyword.
     def make_forms_for_items(listOfItems, keyword):
@@ -444,7 +454,7 @@ def manager_page():
         deactivate_customer_account(customerUsername)
         return redirect(url_for('manager_page'))
 
-    return render_template("managerPage.html",managerForm=managerForm,showCom=showCom,demotions=demotions,closeRequests=closeRequests, newCustomers=newCustomers, vipNotification=vipNotification)
+    return render_template("managerPage.html",managerForm=managerForm,showCom=showCom,demotions=demotions,closeRequests=closeRequests, newCustomers=newCustomers, vipNotification=vipNotification,dropVipNotification=dropVipNotification,deregisterNotification=deregisterNotification)
 
 
 @app.route('/hire',methods=['GET', 'POST'])
@@ -488,8 +498,8 @@ def hire():
             #Create menu if it is a chef
             if int(hireform.typeDropList.data) == 1: #Create empty menu for chef
                 new_menu = Menu(chefID = new_employee.id,
-                                menuName = "To Name",
-                                menuDesc = "To Write Description")
+                                menuName = "New Menu Coming Soon",
+                                menuDesc = "Expect New Food!")
                 db.session.add(new_menu)
                 db.session.commit()
                 print("MENU CREATED!")
