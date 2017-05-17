@@ -88,7 +88,6 @@
 					class="btn btn-default">Get Route to Order?</a>
 		{% endmacro %}
 
-
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
@@ -102,9 +101,9 @@
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
         <li class="active"><a href="#">Home</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Projects</a></li>
+        <li><a href="menu">Menu</a></li>
         <li><a href="#">Contact</a></li>
+        <li><a href="logout">Log Out</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
@@ -122,6 +121,13 @@
     </div>
     <div class="col-sm-8 text-left">
       <h1>Welcome</h1>
+
+			{% if orders == None %}
+				<p> 
+					You have no pending deliveries. You're either very fast or
+					very lazy. 
+				</p>
+			{% else %}
 
 				<div class="table-responsive">
 					<table class="table" style="font-size: 12px;">
@@ -146,6 +152,8 @@
                 {% endfor %}
             </table>
         </div>
+
+			{% endif %}
 
 
 

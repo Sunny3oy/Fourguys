@@ -596,6 +596,8 @@ def specific_delivery_page(order_id):
 def deliveryOrderHistory():
     currentDBoy = current_user.id
     orders = get_all_orders_by_delivery_person(currentDBoy)
+    if len(orders) == 0:
+        orders = None
     return render_template("deliveryOrderHistory.html",
                 orders=orders)
 
@@ -603,6 +605,8 @@ def deliveryOrderHistory():
 def deliveryActiveOrders():
     currentDBoy = current_user.id
     orders = get_active_orders_by_delivery_person(currentDBoy)
+    if len(orders) == 0:
+        orders = None
     return render_template("deliveryActiveOrders.html",
                 orders=orders)
 
